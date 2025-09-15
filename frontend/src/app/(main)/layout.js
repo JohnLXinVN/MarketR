@@ -2,6 +2,8 @@ import "@/app/globals.css";
 
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { Toaster } from "react-hot-toast";
+import Link from "next/link";
 
 export default function MainLayout({ children }) {
   return (
@@ -29,18 +31,19 @@ export default function MainLayout({ children }) {
             {children}
 
             <div className="bottom-6 flex justify-center items-center  space-x-6 text-gray-400 text-sm">
-              <a href="/dashboard" className="hover:text-white">
+              <Link href="/dashboard" className="hover:text-white">
                 News
-              </a>
-              <a href="/faq" className="hover:text-white">
+              </Link>
+              <Link href="/faq" className="hover:text-white">
                 FAQ
-              </a>
-              <a href="/support/tickets" className="hover:text-white">
+              </Link>
+              <Link href="/support/tickets" className="hover:text-white">
                 Support
-              </a>
+              </Link>
             </div>
           </div>
         </main>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

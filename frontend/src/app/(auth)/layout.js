@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import { Toaster } from "react-hot-toast";
 
 export default function AuthLayout({ children }) {
   return (
@@ -11,6 +12,7 @@ export default function AuthLayout({ children }) {
       </head>
       <body className="flex items-center justify-center min-h-screen bg-[url(/images/russian.jpg))] w-full h-full bg-cover">
         {children}
+        <Toaster position="top-right" />
       </body>
     </html>
   );

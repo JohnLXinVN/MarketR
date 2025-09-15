@@ -30,7 +30,7 @@ export class AuthController {
 
     // lưu text vào session
     session.captchaText = captcha.text;
-
+    console.log('Generated captcha:', captcha.text);
     res.type('svg');
     return res.send(captcha.data);
   }
@@ -42,15 +42,21 @@ export class AuthController {
     @Session() session: Record<string, any>,
   ) {
     if (!session.captchaText) {
-      throw new BadRequestException('Captcha hết hạn');
+      throw new BadRequestException('Captcha expired');
     }
-    if (captcha.toLowerCase() !== session.captchaText) {
-      throw new BadRequestException('Captcha sai');
+    if (captcha !== session.captchaText) {
+      throw new BadRequestException('Captcha is wrong');
     }
     return { success: true };
   }
 
   // API signup
+  @Post('check-username')
+  async checkUsername(@Body('username') username: string) {
+    if (!username) throw new BadRequestException("Username can't be empty");
+    return this.authService.checkUsername(username);
+  }
+
   @Post('signup')
   async signup(@Body() signupDto: SignupDto) {
     return this.authService.signup(signupDto);

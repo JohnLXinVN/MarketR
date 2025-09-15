@@ -1,30 +1,100 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-export default function LockScreen() {
+import toast from "react-hot-toast";
+export default function LockScreen({ mode }) {
   const [pin, setPin] = useState("");
+  const router = useRouter();
+  const [error, setError] = useState("");
 
   const handleClick = (num) => {
     if (pin.length < 10) setPin(pin + num); // giới hạn 10 ký tự
   };
 
-  let typeScreen = "login";
-
   const handleClean = () => setPin("");
-  const handleUnlock = () => {
-    if (pin === "12345") {
-      alert("Unlocked!");
-    } else {
-      alert("Wrong PIN!");
-      setPin("");
+  const handleUnlock = async () => {
+    setError("");
+    if (pin.length < 4 || pin.length > 6) {
+      setError("PIN must be at least 4 and at most 6 digits");
+      return;
     }
+    try {
+      if (mode === "signup") {
+        // lấy dữ liệu signup trước đó
+        const preSignup = JSON.parse(localStorage.getItem("preSignup") || "{}");
+        if (!preSignup.username || !preSignup.password) {
+          throw new Error("Don't have signup info");
+        }
+
+        // gọi API signup
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              username: preSignup.username,
+              password: preSignup.password,
+              pincode: pin,
+            }),
+          }
+        );
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "Signup failed");
+        }
+        toast.success("Signup successful!");
+        // Signup thành công → clear storage
+        localStorage.removeItem("preSignup");
+        router.push("/login");
+      } else if (mode === "login") {
+        const preLogin = JSON.parse(localStorage.getItem("preLogin") || "{}");
+        if (!preLogin.username || !preLogin.password) {
+          throw new Error("Don't have login info");
+        }
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              username: preLogin.username,
+              password: preLogin.password,
+              pincode: pin,
+            }),
+          }
+        );
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "Login thất bại");
+        }
+
+        localStorage.removeItem("preLogin");
+        router.push("/dashboard");
+      } else {
+        throw new Error("Thiếu mode (login/signup)");
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+
+    // giả lập check pin
   };
 
   return (
     <div className="flex flex-col items-center justify-center pt-5 pb-10 pl-4 pr-4 bg-black/70 text-white">
       {/* icon + welcome */}
-
-      {typeScreen === "login" ? (
+      {error && (
+        <div className="bg-red-600 text-white mb-2 text-center px-6 py-3 rounded-md shadow-md">
+          <p>{error}</p>
+        </div>
+      )}
+      {mode === "login" ? (
         <div className="flex flex-col items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"

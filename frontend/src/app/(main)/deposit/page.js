@@ -130,7 +130,11 @@ export default function DepositPage() {
                 <td className="p-2 border border-white/10">{o.amount}</td>
                 <td className="p-2 border border-white/10">{o.value}</td>
                 <td className="p-2 border border-white/10">
-                  <a href={o.txUrl} className="text-blue-400 hover:underline">
+                  <a
+                    href={o.txUrl}
+                    target="_blank"
+                    className="text-blue-400 hover:underline"
+                  >
                     View Transaction
                   </a>
                 </td>

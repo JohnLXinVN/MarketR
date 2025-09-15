@@ -37,4 +37,9 @@ export class AuthService {
     const { password: _, ...userWithoutPassword } = savedUser;
     return userWithoutPassword;
   }
+
+  async checkUsername(username: string) {
+    const existingUser = await this.userRepo.findOne({ where: { username } });
+    return { available: !existingUser };
+  }
 }

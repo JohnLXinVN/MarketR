@@ -2,28 +2,71 @@
 import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { Link } from "next/link";
 
 export default function AuthFormSignup() {
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [captcha, setCaptcha] = useState("");
+  const [captchaUrl, setCaptchaUrl] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    console.log("123", process.env.NEXT_PUBLIC_API_URL);
+    refreshCaptcha();
   }, []);
+
+  const refreshCaptcha = () => {
+    setCaptchaUrl(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/captcha?${Date.now()}`
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!username || !password || !captcha) {
-      setError("Vui lòng nhập đủ thông tin");
+    if (!username.trim()) {
+      setError("Username is required");
+      return;
+    }
+    if (username.trim().length < 3) {
+      setError("Username must be at least 3 characters");
+      return;
+    }
+
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+    if (password.length < 4) {
+      setError("Password must be at least 4 characters");
+      return;
+    }
+
+    if (!captcha.trim()) {
+      setError("Captcha is required");
       return;
     }
 
     try {
+      setLoading(true);
+      const res1 = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/check-username`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        }
+      );
+
+      const data = await res1.json();
+      if (!data.available) {
+        throw new Error(data.message || "Username already exists");
+        return;
+      }
+
       // gọi API verify captcha
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-captcha`,
@@ -37,19 +80,28 @@ export default function AuthFormSignup() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || "Captcha không đúng");
+        throw new Error(data.message || "Captcha is wrong!");
       }
 
       // nếu đúng → lưu tạm và chuyển qua 2fa
       localStorage.setItem("preSignup", JSON.stringify({ username, password }));
-      router.push("/2fa");
+      router.push("/2fa?mode=signup");
     } catch (err) {
       setError(err.message);
+      refreshCaptcha();
+      setLoading(false);
+    } finally {
+      setLoading(false); // tắt loading
     }
   };
 
   return (
     <div>
+      {loading && (
+        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-md">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
       <div className="bg-black/70 p-8 rounded-md shadow-lg text-center  w-[360px] text-white">
         <div className="flex flex-col text-center justify-center mb-7">
           <div className="flex  text-center justify-center">
@@ -127,10 +179,9 @@ export default function AuthFormSignup() {
               className="flex-grow bg-transparent border-1 text-[14px] border-gray-600 text-white placeholder-gray-400 text-center transition-colors py-2"
             />
             <img
-              src={`${
-                process.env.NEXT_PUBLIC_API_URL
-              }/auth/captcha?${Date.now()}`}
+              src={captchaUrl}
               alt="captcha"
+              onClick={refreshCaptcha}
               className="mx-auto w-[105px] border rounded"
             />
           </div>
@@ -163,12 +214,12 @@ export default function AuthFormSignup() {
         {/* Link tạo tài khoản */}
       </div>
       <div className="bg-[rgba(255,255,255,.1)] text-center cursor-pointer text-[0.875rem] mt-[4px] py-[2px]">
-        <a
+        <Link
           href="/login"
           className="text-gray-400 hover:text-white transition-colors"
         >
           Already have an account?
-        </a>
+        </Link>
       </div>
     </div>
   );

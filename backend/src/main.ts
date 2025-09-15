@@ -14,6 +14,12 @@ async function bootstrap() {
       cookie: { maxAge: 60000 }, // session sống 1 phút
     }),
   );
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN, // Cho phép Next.js gọi
+    credentials: true, // Cho phép gửi cookie (nếu bạn dùng session)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
   await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();
