@@ -1,0 +1,4 @@
+/* Dashboard.module.css */
+.input {
+  @apply bg-transparent border border-white/20 px-3 py-2 rounded-md w-full text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400;
+}
