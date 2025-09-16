@@ -98,7 +98,13 @@ export default function Header() {
                 </li>
                 <li>
                   <button
-                    onClick={() => alert("Logout clicked")}
+                    onClick={async () => {
+                      localStorage.removeItem("access_token");
+                      localStorage.removeItem("access_token_exp");
+
+                      // Redirect về login
+                      window.location.href = "/login";
+                    }}
                     className="cursor-pointer w-full text-left block px-4 py-2 hover:bg-gray-100"
                   >
                     Logout

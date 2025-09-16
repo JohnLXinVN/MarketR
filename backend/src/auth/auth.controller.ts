@@ -62,5 +62,39 @@ export class AuthController {
     return this.authService.signup(signupDto);
   }
 
+  @Post('login-check')
+  async login(@Body() body: { username: string; password: string }) {
+    const user = await this.authService.validateUser(
+      body.username,
+      body.password,
+    );
+    if (!user) {
+      throw new BadRequestException('Invalid username or password');
+    }
+
+    // ✅ chỉ trả về flag cho phép sang 2FA
+    return { success: true, userId: user.id };
+  }
+
   // API login (bonus)
+
+  @Post('login')
+  async login2fa(
+    @Body() body: { username: string; password: string; pincode: string },
+  ) {
+    const isValid = await this.authService.verify2FA(
+      body.username,
+      body.password,
+      body.pincode,
+    );
+    if (!isValid.check) {
+      throw new BadRequestException('Invalid 2FA code');
+    }
+
+    // ✅ chính thức cấp token
+    return this.authService.issueToken(
+      isValid.user!.id,
+      isValid.user!.username,
+    );
+  }
 }

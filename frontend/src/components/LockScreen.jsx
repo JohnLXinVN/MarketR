@@ -2,10 +2,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
+
 export default function LockScreen({ mode }) {
   const [pin, setPin] = useState("");
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleClick = (num) => {
     if (pin.length < 10) setPin(pin + num); // giới hạn 10 ký tự
@@ -19,6 +22,8 @@ export default function LockScreen({ mode }) {
       return;
     }
     try {
+      setLoading(true);
+
       if (mode === "signup") {
         // lấy dữ liệu signup trước đó
         const preSignup = JSON.parse(localStorage.getItem("preSignup") || "{}");
@@ -71,16 +76,26 @@ export default function LockScreen({ mode }) {
 
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.message || "Login thất bại");
+          throw new Error(data.message || "Login failed");
         }
+        const data = await res.json();
 
         localStorage.removeItem("preLogin");
+
+        const token = data.access_token;
+        const decoded = jwtDecode(token);
+
+        localStorage.setItem("access_token_exp", decoded.exp.toString());
+        localStorage.setItem("access_token", data.access_token);
         router.push("/dashboard");
       } else {
-        throw new Error("Thiếu mode (login/signup)");
+        throw new Error("Lack of mode (login/signup)");
       }
     } catch (err) {
       setError(err.message);
+      setLoading(false); // tắt loading
+    } finally {
+      setLoading(false); // tắt loading
     }
 
     // giả lập check pin
@@ -89,6 +104,11 @@ export default function LockScreen({ mode }) {
   return (
     <div className="flex flex-col items-center justify-center pt-5 pb-10 pl-4 pr-4 bg-black/70 text-white">
       {/* icon + welcome */}
+      {loading && (
+        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-md">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
       {error && (
         <div className="bg-red-600 text-white mb-2 text-center px-6 py-3 rounded-md shadow-md">
           <p>{error}</p>

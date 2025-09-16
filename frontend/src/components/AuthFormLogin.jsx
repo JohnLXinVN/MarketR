@@ -26,10 +26,28 @@ export default function AuthFormLogin() {
     e.preventDefault();
     setError("");
 
-    if (!username.trim()) return setError("Username is required");
-    if (!password.trim()) return setError("Password is required");
-    if (!captcha.trim()) return setError("Captcha is required");
+    if (!username.trim()) {
+      setError("Username is required");
+      return;
+    }
+    if (username.trim().length < 3) {
+      setError("Username must be at least 3 characters");
+      return;
+    }
 
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+    if (password.length < 4) {
+      setError("Password must be at least 4 characters");
+      return;
+    }
+
+    if (!captcha.trim()) {
+      setError("Captcha is required");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -46,7 +64,7 @@ export default function AuthFormLogin() {
       }
 
       // 2) Check username + password
-      const res = await fetch(`${apiBase}/auth/login`, {
+      const res = await fetch(`${apiBase}/auth/login-check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -57,7 +75,7 @@ export default function AuthFormLogin() {
       }
 
       // Nếu đúng → lưu tạm và chuyển sang 2FA
-      localStorage.setItem("preLogin", JSON.stringify({ username }));
+      localStorage.setItem("preLogin", JSON.stringify({ username, password }));
       router.push("/2fa?mode=login");
     } catch (err) {
       setError(err.message);
@@ -102,13 +120,32 @@ export default function AuthFormLogin() {
             className="w-full bg-transparent border border-gray-600 text-white placeholder-gray-400 text-center py-2"
           />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-transparent border border-gray-600 text-white placeholder-gray-400 text-center py-2"
-          />
+          <div className="relative">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-transparent border border-gray-600 text-white placeholder-gray-400 text-center py-2"
+            />
+            <span className="absolute right-1 top-2 text-gray-400">
+              {/* Icon ổ khóa (sử dụng SVG) */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </span>
+          </div>
 
           <div className="flex items-center gap-4">
             <input

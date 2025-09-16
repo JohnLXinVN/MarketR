@@ -13,15 +13,16 @@ import {
   FaChevronDown,
 } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 export default function Sidebar() {
   const pathname = usePathname();
-
   const [openMenus, setOpenMenus] = useState([]);
-
   const [open, setOpenDropBox] = useState(false);
   const dropdownRef = useRef(null);
 
+  const access_token = localStorage.getItem("access_token");
+  const tokenDecoded = jwtDecode(access_token);
   // đóng khi click ngoài
   useEffect(() => {
     function handleClickOutside(e) {
@@ -80,7 +81,9 @@ export default function Sidebar() {
             <img src="/images/user.png" alt="" />
           </div>
           <div>
-            <p className="font-semibold text-[rgba(255,255,255,.85)]">anhhm</p>
+            <p className="font-semibold text-[rgba(255,255,255,.85)]">
+              {tokenDecoded.username}
+            </p>
             <p className="text-sm text-blue-400">User</p>
           </div>
         </div>
@@ -97,7 +100,14 @@ export default function Sidebar() {
               </li>
               <li>
                 <button
-                  onClick={() => alert("Logout clicked")}
+                  onClick={async () => {
+                    // Xóa token ở localStorage
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("access_token_exp");
+
+                    // Redirect về login
+                    window.location.href = "/login";
+                  }}
                   className="cursor-pointer w-full text-left block px-4 py-2 hover:bg-gray-100"
                 >
                   Logout

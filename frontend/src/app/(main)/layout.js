@@ -1,11 +1,37 @@
+"use client";
+
 import "@/app/globals.css";
 
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Toaster } from "react-hot-toast";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function MainLayout({ children }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const publicPaths = ["/login", "/signup", "/2fa"]; // những trang không cần token
+
+    if (!publicPaths.includes(pathname)) {
+      const token = localStorage.getItem("access_token");
+      const exp = localStorage.getItem("access_token_exp");
+
+      if (!token || !exp || Date.now() >= parseInt(exp) * 1000) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("access_token_exp");
+        router.push("/login");
+      }
+    }
+  }, [pathname, router]);
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+  if (!token) {
+    router.push("/login");
+  }
   return (
     <html lang="en" className="h-full">
       <head>

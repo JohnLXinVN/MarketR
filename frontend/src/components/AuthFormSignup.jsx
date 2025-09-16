@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FaUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { Link } from "next/link";
+import Link from "next/link";
 
 export default function AuthFormSignup() {
   const [error, setError] = useState("");
@@ -13,14 +12,14 @@ export default function AuthFormSignup() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const apiBase = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     refreshCaptcha();
   }, []);
 
   const refreshCaptcha = () => {
-    setCaptchaUrl(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/captcha?${Date.now()}`
-    );
+    setCaptchaUrl(`${apiBase}/auth/captcha?${Date.now()}`);
   };
 
   const handleSubmit = async (e) => {
