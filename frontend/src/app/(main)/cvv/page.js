@@ -11,6 +11,8 @@ export default function CvvPage() {
 
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedDOB, setSelectedDOB] = useState("");
+  const [selectedSSN, setSelectedSSN] = useState("");
 
   useEffect(() => {
     async function loadCountries() {
@@ -27,6 +29,7 @@ export default function CvvPage() {
         console.error("Error loading countries:", err);
       }
     }
+
     loadCountries();
   }, []);
 
@@ -357,12 +360,32 @@ export default function CvvPage() {
             <label className="block text-sm font-medium text-[rgba(255,255,255,0.85)] mb-1">
               DOB
             </label>
-            <input
-              placeholder="All"
+            <select
+              value={selectedDOB}
+              onChange={(e) => setSelectedDOB(e.target.value)}
               className="bg-transparent border border-white/20 px-3 py-2 rounded-md 
          w-full text-sm placeholder-gray-400 
          focus:outline-none focus:ring-1 focus:ring-blue-400;"
-            />
+            >
+              <option
+                value=""
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                - all -
+              </option>
+              <option
+                value="1"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                Yes
+              </option>
+              <option
+                value="0"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                No
+              </option>
+            </select>
           </div>
 
           {/* SSN */}
@@ -370,12 +393,32 @@ export default function CvvPage() {
             <label className="block text-sm font-medium text-[rgba(255,255,255,0.85)] mb-1">
               SSN
             </label>
-            <input
-              placeholder="All"
+            <select
+              value={selectedSSN}
+              onChange={(e) => setSelectedSSN(e.target.value)}
               className="bg-transparent border border-white/20 px-3 py-2 rounded-md 
          w-full text-sm placeholder-gray-400 
          focus:outline-none focus:ring-1 focus:ring-blue-400;"
-            />
+            >
+              <option
+                value=""
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                - all -
+              </option>
+              <option
+                value="1"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                Yes
+              </option>
+              <option
+                value="0"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                No
+              </option>
+            </select>
           </div>
 
           {/* Type */}
@@ -391,11 +434,17 @@ export default function CvvPage() {
               <option className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]">
                 - all -
               </option>
-              <option className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]">
-                Visa
+              <option
+                value="visa"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                VISA
               </option>
-              <option className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]">
-                Mastercard
+              <option
+                value="mastercard"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                MASTERCARD
               </option>
             </select>
           </div>
@@ -405,12 +454,30 @@ export default function CvvPage() {
             <label className="block text-sm font-medium text-[rgba(255,255,255,0.85)] mb-1">
               Level
             </label>
-            <input
-              placeholder="All"
+            <select
               className="bg-transparent border border-white/20 px-3 py-2 rounded-md 
          w-full text-sm placeholder-gray-400 
          focus:outline-none focus:ring-1 focus:ring-blue-400;"
-            />
+            >
+              <option
+                value=""
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                - all -
+              </option>
+              <option
+                value="platinum"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                PLATINUM
+              </option>
+              <option
+                value="gold"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                GOLD
+              </option>
+            </select>
           </div>
 
           {/* Class */}
@@ -418,12 +485,30 @@ export default function CvvPage() {
             <label className="block text-sm font-medium text-[rgba(255,255,255,0.85)] mb-1">
               Class
             </label>
-            <input
-              placeholder="All"
+            <select
               className="bg-transparent border border-white/20 px-3 py-2 rounded-md 
          w-full text-sm placeholder-gray-400 
          focus:outline-none focus:ring-1 focus:ring-blue-400;"
-            />
+            >
+              <option
+                value=""
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                - all -
+              </option>
+              <option
+                value="debit"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                DEBIT
+              </option>
+              <option
+                value="credit"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
+                CREDIT
+              </option>
+            </select>
           </div>
 
           {/* Vendor */}
@@ -449,13 +534,22 @@ export default function CvvPage() {
          w-full text-sm placeholder-gray-400 
          focus:outline-none focus:ring-1 focus:ring-blue-400;"
             >
-              <option className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]">
+              <option
+                value="10"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
                 10
               </option>
-              <option className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]">
+              <option
+                value="20"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
                 20
               </option>
-              <option className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]">
+              <option
+                value="30"
+                className="text-[rgba(255,255,255,0.85)] bg-[#1a1a1a]"
+              >
                 30
               </option>
             </select>

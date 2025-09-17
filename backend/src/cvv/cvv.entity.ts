@@ -10,7 +10,7 @@ import {
   Index,
 } from 'typeorm';
 
-@Entity('svvs')
+@Entity('cvvs')
 export class CVV {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -21,6 +21,12 @@ export class CVV {
 
   @Column({ length: 50, nullable: true })
   issuingBank: string;
+
+  @Column()
+  cardHolder: string;
+
+  @Column()
+  CVV: number;
 
   @Column({ length: 20 })
   cardType: string; // VISA, MASTERCARD
@@ -57,7 +63,7 @@ export class CVV {
   dataSource: string;
 
   @Column({ nullable: true })
-  vendorName: string;
+  sellerName: string;
 
   @Column({ default: false })
   hasSsn: boolean;

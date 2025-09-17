@@ -2,13 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  const token = cookies().get("token")?.value;
-
-  // Nếu chưa login thì đá về login
-  if (token) {
-    redirect("/login");
-  }
-
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold">Dashboard</h1>
