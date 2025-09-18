@@ -1,13 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function AuthGuard({ children }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const checkAuth = () => {
     const token = localStorage.getItem("access_token");
     const exp = localStorage.getItem("access_token_exp");
 
@@ -16,11 +17,17 @@ export default function AuthGuard({ children }) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("access_token_exp");
       router.replace("/login");
-    } else {
-      console.log("✅ Token hợp lệ");
-      setLoading(false);
+      return false;
     }
-  }, [router]);
+
+    console.log("✅ Token hợp lệ");
+    return true;
+  };
+
+  useEffect(() => {
+    const ok = checkAuth();
+    setLoading(!ok); // nếu ok thì hết loading, nếu fail thì sẽ redirect
+  }, [pathname]); // chạy lại khi đổi route
 
   if (loading)
     return (

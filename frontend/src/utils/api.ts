@@ -1,15 +1,13 @@
-// src/utils/api.ts
 "use client";
 
 import axios from "axios";
 
-// ✅ Tạo instance axios
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000", // đổi URL backend nếu cần
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
   timeout: 10000,
 });
 
-// ✅ Thêm interceptor để tự động gắn token từ localStorage
+// 🟢 Request interceptor → gắn token
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
@@ -20,12 +18,18 @@ api.interceptors.request.use(
     }
     return config;
   },
+  (err) => Promise.reject(err)
+);
+
+// 🔴 Response interceptor → bắt lỗi 401
+api.interceptors.response.use(
+  (res) => res,
   (err) => {
     if (err.response?.status === 401) {
+      console.log("❌ Token hết hạn hoặc không hợp lệ, redirect login...");
       localStorage.removeItem("access_token");
       localStorage.removeItem("access_token_exp");
-      // Optional: redirect login
-      window.location.href = "/login";
+      window.location.href = "/login"; // redirect về login
     }
     return Promise.reject(err);
   }

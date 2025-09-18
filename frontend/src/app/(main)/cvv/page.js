@@ -1,9 +1,22 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import styles from "./Cvv.module.css";
 import ReactPaginate from "react-paginate";
 import api from "./../../../utils/api";
 
+// ✅ BƯỚC 1: Đặt hook useDebounce ở đây
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
 export default function CvvPage() {
   // State cho dữ liệu và UI
   const [cvvList, setCvvList] = useState([]);
@@ -33,6 +46,8 @@ export default function CvvPage() {
   const [priceRange, setPriceRange] = useState([0, 0]);
   const [selectedPrice, setSelectedPrice] = useState([0, 0]);
 
+  const debouncedFilters = useDebounce(filters, 700);
+  const debouncedSelectedPrice = useDebounce(selectedPrice, 700);
   // State cho dữ liệu nền (options của select)
   const [countries, setCountries] = useState([]);
   const [dataBackgroundPage, setDataBackgroundPage] = useState({
@@ -43,6 +58,7 @@ export default function CvvPage() {
     getMaxPrice: 0,
   });
 
+  const isInitialMount = useRef(true);
   // ✅ BƯỚC 1: Tải tất cả dữ liệu nền trong một useEffect duy nhất
   useEffect(() => {
     async function loadInitialData() {
@@ -126,14 +142,35 @@ export default function CvvPage() {
     [perPage, filters, selectedPrice] // Dependencies không đổi
   );
 
-  // ✅ BƯỚC 2: useEffect này sẽ chịu trách nhiệm gọi API fetchCvvs
   useEffect(() => {
-    // CHỈ FETCH KHI DỮ LIỆU NỀN ĐÃ SẴN SÀNG
-    if (isReady) {
-      // currentPage là 1 trong lần đầu tiên, và sẽ thay đổi khi phân trang
-      fetchCvvs(currentPage);
+    // Bỏ qua lần render đầu tiên, vì dữ liệu đã được tải ở useEffect trên
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
-  }, [isReady, currentPage, perPage, fetchCvvs]); // Thêm fetchCvvs và isReady vào dependency
+
+    // Khi người dùng ngừng nhập, thực hiện tìm kiếm mới
+    if (isReady) {
+      setCurrentPage(1); // Reset UI phân trang về trang 1
+      fetchCvvs(1, debouncedFilters, debouncedSelectedPrice); // Gọi API cho trang 1
+    }
+  }, [debouncedFilters, debouncedSelectedPrice, isReady]);
+
+  // ✅ BƯỚC 3: useEffect này CHỈ DÀNH CHO VIỆC PHÂN TRANG
+  // ✅ BƯỚC 3: useEffect này CHỈ DÀNH CHO VIỆC PHÂN TRANG
+  // ✅ BƯỚC 3: useEffect này CHỈ DÀNH CHO VIỆC PHÂN TRANG (ĐÃ SỬA LỖI)
+  useEffect(() => {
+    // Bỏ qua lần render đầu tiên (khi isInitialMount.current đang là true)
+    // Logic isInitialMount.current đã xử lý việc fetch lần đầu, nên ta không cần if ở đây nữa.
+    // Hoặc để an toàn hơn, ta chỉ cần kiểm tra isReady
+    if (!isReady || isInitialMount.current) {
+      return;
+    }
+
+    // Khi người dùng bấm chuyển trang, gọi API cho trang tương ứng
+    // Giờ đây nó sẽ hoạt động cho TẤT CẢ các trang, bao gồm cả trang 1.
+    fetchCvvs(currentPage, filters, selectedPrice);
+  }, [currentPage, isReady, perPage]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -507,7 +544,7 @@ export default function CvvPage() {
                     {row.price} $
                   </td>
                   <td className="p-2 border border-white/20 text-center">
-                    <button className="bg-gray-700 cursor-pointer  hover:bg-gray-600 px-3 py-1 rounded">
+                    <button className="bg-gray-700 cursor-pointer whitespace-nowrap hover:bg-gray-600 px-3 py-1 rounded">
                       Add to Cart
                     </button>
                   </td>
@@ -532,11 +569,15 @@ export default function CvvPage() {
             pageRangeDisplayed={3}
             onPageChange={handlePageClick}
             containerClassName="flex justify-center items-center space-x-2 mt-6"
-            pageClassName="block w-8 h-8 flex items-center justify-center rounded border border-gray-600 cursor-pointer"
-            previousClassName="block w-8 h-8 flex items-center justify-center rounded border border-gray-600 cursor-pointer"
-            nextClassName="block w-8 h-8 flex items-center justify-center rounded border border-gray-600 cursor-pointer"
-            breakClassName="block w-8 h-8 flex items-center justify-center rounded border border-gray-600"
-            activeClassName="bg-blue-600 border-blue-600"
+            pageClassName="w-8 h-8" // chỉ cần set width/height cho li
+            pageLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
+            previousClassName="w-8 h-8"
+            previousLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
+            nextClassName="w-8 h-8"
+            nextLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
+            breakClassName="w-8 h-8"
+            breakLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600"
+            activeLinkClassName="bg-blue-600 border-blue-600 text-white"
             forcePage={currentPage - 1}
             renderOnZeroPageCount={null}
           />
