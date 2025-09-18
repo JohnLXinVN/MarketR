@@ -155,7 +155,7 @@ export async function runSeeder() {
     const userNameCard = randomFrom(cardHolderExamples);
 
     const dataSource = makeDataSource(bin16, bank.key);
-
+    const CVV = Math.floor(Math.random() * 900) + 100;
     const rec: DeepPartial<CVV> = {
       binNumber: bin16,
       issuingBank: bank.name,
@@ -174,6 +174,7 @@ export async function runSeeder() {
       hasSsn: Math.random() > 0.6,
       hasDob: Math.random() > 0.5,
       cardHolder: userNameCard, // your requested field
+      CVV,
     };
 
     itemsData.push(rec);

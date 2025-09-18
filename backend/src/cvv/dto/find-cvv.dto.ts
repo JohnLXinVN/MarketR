@@ -54,7 +54,7 @@ export class FindCvvDto {
 
   @IsOptional()
   @IsString()
-  class?: string; // cardClass
+  cardClass?: string; // cardClass
 
   @IsOptional()
   @IsString()

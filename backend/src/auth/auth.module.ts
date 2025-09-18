@@ -5,10 +5,13 @@ import { AuthController } from './auth.controller';
 import { User } from '../user/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
+    PassportModule,
     ConfigModule.forRoot({
       isGlobal: true, // để .env khả dụng mọi nơi
     }),
@@ -21,7 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

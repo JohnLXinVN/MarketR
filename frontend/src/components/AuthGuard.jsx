@@ -12,11 +12,13 @@ export default function AuthGuard({ children }) {
     const exp = localStorage.getItem("access_token_exp");
 
     if (!token || !exp || Date.now() >= parseInt(exp) * 1000) {
+      console.log("➡️ Token hết hạn hoặc không hợp lệ, redirect...");
       localStorage.removeItem("access_token");
       localStorage.removeItem("access_token_exp");
-      router.push("/login");
+      router.replace("/login");
     } else {
-      setLoading(false); // token hợp lệ, render children
+      console.log("✅ Token hợp lệ");
+      setLoading(false);
     }
   }, [router]);
 
