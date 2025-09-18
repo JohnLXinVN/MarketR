@@ -140,17 +140,6 @@ export default function CvvPage() {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = () => {
-    // Khi tìm kiếm, luôn quay về trang 1
-    // Việc set currentPage sẽ tự động kích hoạt useEffect ở trên để gọi lại API
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      // Nếu đã ở trang 1, thì phải gọi fetchCvvs thủ công vì currentPage không đổi
-      fetchCvvs(1);
-    }
-  };
-
   const handlePageClick = (event) => {
     setCurrentPage(event.selected + 1);
   };
@@ -426,15 +415,6 @@ export default function CvvPage() {
                 </div>
               </div>
             </div>
-          </div>
-          {/* Search Button */}
-          <div className="flex justify-end items-end">
-            <button
-              onClick={handleSearch}
-              className="bg-white/10 cursor-pointer text-[rgba(255,255,255,0.85)] px-6 py-2 rounded-md hover:bg-white/20 transition w-full"
-            >
-              Search
-            </button>
           </div>
         </div>
       </div>
