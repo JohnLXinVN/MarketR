@@ -26,4 +26,8 @@ export class UserService {
     const user = this.usersRepository.create(userData);
     return this.usersRepository.save(user);
   }
+
+  async findUserById(id: number) {
+    return this.usersRepository.findOne({ where: { id } });
+  }
 }

@@ -1,4 +1,5 @@
 // src/products/entities/product.entity.ts
+import { CartItem } from 'src/cart/cart-item.entity';
 import { User } from 'src/user/user.entity';
 import {
   Entity,
@@ -7,6 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   Index,
 } from 'typeorm';
 
@@ -65,6 +67,9 @@ export class CVV {
   @Column({ nullable: true })
   sellerName: string;
 
+  @Column({ nullable: true })
+  specificAddress: string;
+
   @Column({ default: false })
   hasSsn: boolean;
 
@@ -76,4 +81,7 @@ export class CVV {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.cvv)
+  cartItems: CartItem[];
 }

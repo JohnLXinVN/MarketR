@@ -83,7 +83,28 @@ export class CvvService {
       priceMax,
     } = queryDto;
 
-    const queryBuilder = this.cvvRepository.createQueryBuilder('cvvs');
+    const queryBuilder = this.cvvRepository
+      .createQueryBuilder('cvvs')
+      .select([
+        'cvvs.id',
+        'cvvs.binNumber',
+        'cvvs.issuingBank',
+        'cvvs.country',
+        'cvvs.state',
+        'cvvs.city',
+        'cvvs.zip',
+        'cvvs.expiryDate',
+        'cvvs.cardType',
+        'cvvs.cardLevel',
+        'cvvs.dataSource',
+        'cvvs.cardClass',
+        'cvvs.sellerName',
+        'cvvs.price',
+        'cvvs.hasSsn',
+        'cvvs.hasDob',
+        'cvvs.isAvailable',
+        'cvvs.createdAt',
+      ]);
 
     // Chỉ lấy các item đang có sẵn để bán
     queryBuilder.where('cvvs.isAvailable = :isAvailable', {

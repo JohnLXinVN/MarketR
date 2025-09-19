@@ -1,3 +1,4 @@
+import { CartItem } from 'src/cart/cart-item.entity';
 import { CVV } from 'src/cvv/cvv.entity';
 import {
   Entity,
@@ -27,4 +28,14 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  walletBalance: number;
+
+  // Tổng tiền đã nạp
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  totalDeposited: number;
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user)
+  cartItems: CartItem[];
 }

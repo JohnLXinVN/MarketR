@@ -3,8 +3,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import styles from "./Cvv.module.css";
 import ReactPaginate from "react-paginate";
 import api from "./../../../utils/api";
+import { toast } from "react-hot-toast";
 
-// ✅ BƯỚC 1: Đặt hook useDebounce ở đây
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -18,17 +18,15 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 export default function CvvPage() {
-  // State cho dữ liệu và UI
   const [cvvList, setCvvList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Bắt đầu ở true
-  const [isReady, setIsReady] = useState(false); // CỜ ĐỂ BIẾT KHI NÀO DỮ LIỆU NỀN ĐÃ TẢI XONG
+  const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+  const [isReadySearch, setIsReadySearch] = useState(false);
 
-  // State cho phân trang
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  // State cho các giá trị filter
   const [filters, setFilters] = useState({
     bin: "",
     bank: "",
@@ -48,7 +46,10 @@ export default function CvvPage() {
 
   const debouncedFilters = useDebounce(filters, 700);
   const debouncedSelectedPrice = useDebounce(selectedPrice, 700);
-  // State cho dữ liệu nền (options của select)
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [itemsInCart, setItemsInCart] = useState([]);
+
   const [countries, setCountries] = useState([]);
   const [dataBackgroundPage, setDataBackgroundPage] = useState({
     getCardTypes: [],
@@ -58,19 +59,17 @@ export default function CvvPage() {
     getMaxPrice: 0,
   });
 
-  const isInitialMount = useRef(true);
-  // ✅ BƯỚC 1: Tải tất cả dữ liệu nền trong một useEffect duy nhất
+  const initialLoadRef = useRef(true);
+
   useEffect(() => {
     async function loadInitialData() {
       setIsLoading(true);
       try {
-        // Tải đồng thời cả 2 API để tăng tốc
         const [countriesRes, backgroundDataRes] = await Promise.all([
           fetch("/api/countries"),
           api.get("/cvvs/get_all_data_search"),
         ]);
 
-        // Xử lý countries
         const countriesData = await countriesRes.json();
         const list = countriesData.map((c) => ({
           name: c.name.common,
@@ -79,7 +78,6 @@ export default function CvvPage() {
         list.sort((a, b) => a.name.localeCompare(b.name));
         setCountries(list);
 
-        // Xử lý background data
         const backgroundData = backgroundDataRes.data;
         setDataBackgroundPage(backgroundData);
         setPriceRange([backgroundData.getMinPrice, backgroundData.getMaxPrice]);
@@ -88,19 +86,18 @@ export default function CvvPage() {
           backgroundData.getMaxPrice,
         ]);
 
-        // Sau khi tất cả state cần thiết đã được set, BẬT CỜ isReady
+        const cartRes = await api.get("/cart");
+        setItemsInCart(cartRes.data);
+
         setIsReady(true);
       } catch (err) {
         console.error("Error loading initial data:", err);
-        // Có thể thêm state để hiển thị lỗi ra UI
       }
-      // setIsLoading sẽ được set thành false trong hàm fetchCvvs
     }
 
     loadInitialData();
-  }, []); // Chỉ chạy 1 lần duy nhất khi component mount
+  }, []);
 
-  // ✅ HÀM GỌI API CHÍNH
   const fetchCvvs = useCallback(
     async (pageToFetch) => {
       setIsLoading(true);
@@ -124,11 +121,10 @@ export default function CvvPage() {
           priceMax: selectedPrice[1],
         };
 
-        console.log("params", params);
-
         const response = await api.post("/cvvs/get_list_cvv", params);
 
-        console.log("response", response.data);
+        console.log("123", "đã gọi api call");
+
         setCvvList(response.data.data);
         setPageCount(response.data.totalPages);
       } catch (error) {
@@ -139,38 +135,37 @@ export default function CvvPage() {
         setIsLoading(false);
       }
     },
-    [perPage, filters, selectedPrice] // Dependencies không đổi
+    [perPage, filters, selectedPrice]
   );
 
   useEffect(() => {
-    // Bỏ qua lần render đầu tiên, vì dữ liệu đã được tải ở useEffect trên
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
-    // Khi người dùng ngừng nhập, thực hiện tìm kiếm mới
     if (isReady) {
-      setCurrentPage(1); // Reset UI phân trang về trang 1
-      fetchCvvs(1, debouncedFilters, debouncedSelectedPrice); // Gọi API cho trang 1
+      if (initialLoadRef.current) {
+        initialLoadRef.current = false;
+      } else {
+        setCurrentPage(1);
+        if (isReadySearch) {
+          fetchCvvs(currentPage);
+        }
+
+        setIsReadySearch(true);
+      }
     }
   }, [debouncedFilters, debouncedSelectedPrice, isReady]);
 
-  // ✅ BƯỚC 3: useEffect này CHỈ DÀNH CHO VIỆC PHÂN TRANG
-  // ✅ BƯỚC 3: useEffect này CHỈ DÀNH CHO VIỆC PHÂN TRANG
-  // ✅ BƯỚC 3: useEffect này CHỈ DÀNH CHO VIỆC PHÂN TRANG (ĐÃ SỬA LỖI)
   useEffect(() => {
-    // Bỏ qua lần render đầu tiên (khi isInitialMount.current đang là true)
-    // Logic isInitialMount.current đã xử lý việc fetch lần đầu, nên ta không cần if ở đây nữa.
-    // Hoặc để an toàn hơn, ta chỉ cần kiểm tra isReady
-    if (!isReady || isInitialMount.current) {
-      return;
+    if (!isReady) return;
+
+    const controller = new AbortController();
+
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false;
+    } else {
+      fetchCvvs(currentPage);
     }
 
-    // Khi người dùng bấm chuyển trang, gọi API cho trang tương ứng
-    // Giờ đây nó sẽ hoạt động cho TẤT CẢ các trang, bao gồm cả trang 1.
-    fetchCvvs(currentPage, filters, selectedPrice);
-  }, [currentPage, isReady, perPage]);
+    return () => controller.abort();
+  }, [currentPage, perPage, isReady]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -181,7 +176,37 @@ export default function CvvPage() {
     setCurrentPage(event.selected + 1);
   };
 
-  // Phần JSX của bạn giữ nguyên, không cần thay đổi
+  const handleAddToCart = async (cvvId) => {
+    try {
+      console.log("Adding to cart:", cvvId);
+      await api.post("/cart", { cvvId });
+
+      setItemsInCart((prev) => [...prev, cvvId]);
+
+      toast.success("Added to cart successful!");
+    } catch (error) {
+      console.error("Failed to add item to cart:", error);
+    }
+  };
+
+  const handleBulkAddToCart = async () => {
+    if (selectedItems.length === 0) return;
+    try {
+      const addedCount = await api.post("/cart/bulk", {
+        cvvIds: selectedItems,
+      });
+
+      setItemsInCart((prev) => [...new Set([...prev, ...selectedItems])]);
+
+      toast.success(
+        `Added ${addedCount.data.addedCount} items to cart successfully!`
+      );
+      setSelectedItems([]);
+    } catch (error) {
+      console.error("Failed to add bulk items to cart:", error);
+    }
+  };
+
   return (
     <div className="flex-1 bg-center pt-4 pl-6 pr-6 pb-10 text-[rgba(255,255,255,0.85)]">
       {/* Filter Form */}
@@ -457,12 +482,34 @@ export default function CvvPage() {
       </div>
       {/* Data Table */}
       <div className="">
+        {selectedItems.length > 0 && (
+          <div className="mb-4">
+            <button
+              onClick={handleBulkAddToCart}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded"
+            >
+              Add to Cart ({selectedItems.length})
+            </button>
+          </div>
+        )}
         <table className="w-full border border-white/20 text-sm">
           {/* ... thead ... */}
           <thead className="bg-white/10">
             <tr>
               <th className="p-2 border border-white/20">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      const allSelectableIds = cvvList
+                        .filter((item) => !itemsInCart.includes(item.id))
+                        .map((item) => item.id);
+                      setSelectedItems(allSelectableIds);
+                    } else {
+                      setSelectedItems([]);
+                    }
+                  }}
+                />
               </th>
               <th className="p-2 border border-white/20">Type</th>
               <th className="p-2 border border-white/20">Bin</th>
@@ -493,63 +540,97 @@ export default function CvvPage() {
                 </td>
               </tr>
             ) : cvvList.length > 0 ? (
-              cvvList.map((row) => (
-                <tr key={row.id} className="hover:bg-white/5">
-                  <td className="p-2 border border-white/20 text-center">
-                    <input type="checkbox" />
-                  </td>
-                  <td className="p-2 border border-white/20">{row.cardType}</td>
-                  <td className="p-2 border border-white/20">
-                    {row.binNumber
-                      ? row.binNumber.slice(0, 6) +
-                        "*".repeat(row.binNumber.length - 6)
-                      : ""}
-                  </td>
-                  <td className="p-2 border border-white/20">
-                    {row.issuingBank}
-                  </td>
-                  <td className="p-2 border border-white/20">
-                    {row.cardClass}
-                  </td>
-                  <td className="p-2 border border-white/20">
-                    {row.cardLevel}
-                  </td>
-                  <td className="p-2 border border-white/20">{row.expiry}</td>
-                  <td className="p-2 border border-white/20">{row.country}</td>
-                  <td className="p-2 border border-white/20">{row.state}</td>
-                  <td className="p-2 border border-white/20">****</td>
-                  <td className="p-2 border border-white/20">
-                    {row.dataSource
-                      ? (() => {
-                          const parts = row.dataSource.split("_");
-                          if (parts.length <= 2) return row.dataSource;
-                          return (
-                            parts.slice(0, 2).join("_") +
-                            "_" +
-                            "*".repeat(parts.slice(2).join("_").length)
-                          );
-                        })()
-                      : ""}
-                  </td>
-                  <td className="p-2 border border-white/20">
-                    {row.hasSsn ? "Yes" : "No"}
-                  </td>
-                  <td className="p-2 border border-white/20">
-                    {row.hasDob ? "Yes" : "No"}
-                  </td>
-                  <td className="p-2 border border-white/20">
-                    {row.sellerName}
-                  </td>
-                  <td className="p-2 border border-white/20 whitespace-nowrap">
-                    {row.price} $
-                  </td>
-                  <td className="p-2 border border-white/20 text-center">
-                    <button className="bg-gray-700 cursor-pointer whitespace-nowrap hover:bg-gray-600 px-3 py-1 rounded">
-                      Add to Cart
-                    </button>
-                  </td>
-                </tr>
-              ))
+              cvvList.map((row) => {
+                const isInCart = itemsInCart.includes(row.id);
+                const isSelected = selectedItems.includes(row.id);
+                return (
+                  <tr key={row.id} className="hover:bg-white/5">
+                    <td className="p-2 border border-white/20 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        disabled={isInCart}
+                        onChange={() => {
+                          if (isSelected) {
+                            setSelectedItems((prev) =>
+                              prev.filter((id) => id !== row.id)
+                            );
+                          } else {
+                            setSelectedItems((prev) => [...prev, row.id]);
+                          }
+                        }}
+                      />
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.cardType}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.binNumber
+                        ? row.binNumber.slice(0, 6) +
+                          "*".repeat(row.binNumber.length - 6)
+                        : ""}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.issuingBank}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.cardClass}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.cardLevel}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.expiryDate
+                        ? "**/" + row.expiryDate.split("/")[1]
+                        : ""}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.country}
+                    </td>
+                    <td className="p-2 border border-white/20">{row.state}</td>
+                    <td className="p-2 border border-white/20">****</td>
+                    <td className="p-2 border border-white/20">
+                      {row.dataSource
+                        ? (() => {
+                            const parts = row.dataSource.split("_");
+                            if (parts.length <= 2) return row.dataSource;
+                            return (
+                              parts.slice(0, 2).join("_") +
+                              "_" +
+                              "*".repeat(parts.slice(2).join("_").length)
+                            );
+                          })()
+                        : ""}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.hasSsn ? "Yes" : "No"}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.hasDob ? "Yes" : "No"}
+                    </td>
+                    <td className="p-2 border border-white/20">
+                      {row.sellerName}
+                    </td>
+                    <td className="p-2 border border-white/20 whitespace-nowrap">
+                      {row.price} $
+                    </td>
+                    <td className="p-2 border border-white/20 text-center">
+                      <button
+                        onClick={() => handleAddToCart(row.id)}
+                        disabled={isInCart}
+                        className={`whitespace-nowrap px-3 py-1 rounded cursor-pointer 
+    ${
+      isInCart
+        ? "bg-green-600 text-white" // 🟢 màu cho In Cart
+        : "bg-gray-700 hover:bg-gray-600 text-white" // ⚪ màu cho Add to Cart
+    }`}
+                      >
+                        {isInCart ? "In Cart" : "Add to Cart"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="16" className="text-center p-4">
@@ -569,7 +650,7 @@ export default function CvvPage() {
             pageRangeDisplayed={3}
             onPageChange={handlePageClick}
             containerClassName="flex justify-center items-center space-x-2 mt-6"
-            pageClassName="w-8 h-8" // chỉ cần set width/height cho li
+            pageClassName="w-8 h-8"
             pageLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
             previousClassName="w-8 h-8"
             previousLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"

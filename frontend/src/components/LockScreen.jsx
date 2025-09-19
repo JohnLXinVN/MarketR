@@ -87,6 +87,8 @@ export default function LockScreen({ mode }) {
 
         localStorage.setItem("access_token_exp", decoded.exp.toString());
         localStorage.setItem("access_token", data.access_token);
+        toast.success("Login successful!");
+
         router.push("/dashboard");
       } else {
         throw new Error("Lack of mode (login/signup)");

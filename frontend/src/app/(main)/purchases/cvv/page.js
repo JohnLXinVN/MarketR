@@ -1,10 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
+import api from "../../../../utils/api";
 
 export default function OrdersPage() {
-  let pageCount = 10;
-  let handlePageClick = () => {};
+  const [orderItems, setOrderItems] = useState([]);
+  const [pageCount, setPageCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch dữ liệu khi trang thay đổi
+  const fetchOrders = async (currentPage) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/orders-cvv?page=${currentPage}`);
+      console.log(currentPage);
+      console.log(response.data);
+      setOrderItems(response.data.data);
+      setPageCount(response.data.meta.totalPages);
+    } catch (err) {
+      setError(err.message || "Failed to fetch orders.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders(1);
+  }, []);
+
+  const handlePageClick = (event) => {
+    fetchOrders(event.selected + 1);
+  };
 
   return (
     <div className="flex flex-col items-center justify-start w-full text-[rgba(255,255,255,0.85)]">
@@ -37,77 +65,66 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border border-gray-600 px-4 py-2">9760</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  4183764698235548 | 11/2026 | 781 | Thomas Hernandez | PSC
-                  7779, Box 2706 APO AA 92129
-                </td>
-                <td className="border border-gray-600 px-4 py-2">—</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  <span className="px-3 py-1 rounded bg-gray-600 text-white text-xs">
-                    no refund
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-gray-600 px-4 py-2">9755</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  4963814754653484 | 05/2030 | 871 | Molly Schwartz | USNS
-                  Bartlett FPO AP 75211
-                </td>
-                <td className="border border-gray-600 px-4 py-2">—</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  <span className="px-3 py-1 rounded bg-gray-600 text-white text-xs">
-                    no refund
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-gray-600 px-4 py-2">9754</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  4725723346247888 | 10/2031 | 556 | Patrick Harris | 30434 Evan
-                  Lodge Apt. 793 Josephfort, CT 39006
-                </td>
-                <td className="border border-gray-600 px-4 py-2">—</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  <span className="px-3 py-1 rounded bg-gray-600 text-white text-xs">
-                    no refund
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-gray-600 px-4 py-2">9748</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  4221970457834363 | 07/2031 | 922 | Dawn Marshall | Unit 7584
-                  Box 1164 DPO AE 66504
-                </td>
-                <td className="border border-gray-600 px-4 py-2">—</td>
-                <td className="border border-gray-600 px-4 py-2">
-                  <span className="px-3 py-1 rounded bg-gray-600 text-white text-xs">
-                    no refund
-                  </span>
-                </td>
-              </tr>
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4">
+                    <div className="flex justify-center">
+                      <div className="relative w-12 h-12">
+                        <div className="absolute w-full h-full border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4 text-red-400">
+                    {error}
+                  </td>
+                </tr>
+              ) : orderItems.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4">
+                    You have no orders.
+                  </td>
+                </tr>
+              ) : (
+                orderItems.map((item) => (
+                  <tr key={item.id} className="border-t border-gray-700">
+                    <td className="px-4 py-2">{item.id}</td>
+                    <td className="px-4 py-2 font-mono whitespace-pre-wrap break-all">
+                      {item.formattedCvv}
+                    </td>
+                    <td className="px-4 py-2">{item.expiryDate}</td>
+                    <td className="px-4 py-2">
+                      <span className="px-3 py-1 rounded bg-green-600 text-white text-xs">
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-          <ReactPaginate
-            previousLabel={null} // ❌ bỏ Previous
-            nextLabel={null}
-            breakLabel={"..."}
-            pageCount={pageCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={3}
-            onPageChange={handlePageClick}
-            containerClassName="flex justify-center space-x-2 mt-6"
-            pageClassName="px-3 py-1 border cursor-pointer rounded bg-gray-700 text-[rgba(255,255,255,0.85)]"
-            activeClassName="bg-blue-600"
-            renderOnZeroPageCount={null}
-          />
+          {pageCount > 1 && (
+            <ReactPaginate
+              previousLabel={"<"}
+              nextLabel={">"}
+              breakLabel={"..."}
+              pageCount={pageCount}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={3}
+              onPageChange={handlePageClick}
+              containerClassName="flex justify-center items-center space-x-2 p-4"
+              pageClassName="px-3 py-1 border border-gray-600 cursor-pointer rounded bg-[#132b4a] hover:bg-blue-600"
+              previousClassName="px-3 py-1 border border-gray-600 cursor-pointer rounded bg-[#132b4a] hover:bg-blue-600"
+              nextClassName="px-3 py-1 border border-gray-600 cursor-pointer rounded bg-[#132b4a] hover:bg-blue-600"
+              breakClassName="px-3 py-1"
+              activeClassName="bg-blue-600 border-blue-500"
+              renderOnZeroPageCount={null}
+            />
+          )}
         </div>
       </div>
-
-      {/* Footer */}
     </div>
   );
 }

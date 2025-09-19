@@ -6,6 +6,9 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CvvModule } from './cvv/cvv.module';
+import { CartModule } from './cart/cart.module';
+import { CartItem } from './cart/cart-item.entity';
+import { CvvOrderModule } from './cvv-order/cvv-order.module';
 
 @Module({
   imports: [
@@ -24,6 +27,8 @@ import { CvvModule } from './cvv/cvv.module';
     UserModule,
     AuthModule,
     CvvModule,
+    CartModule,
+    CvvOrderModule,
   ],
 })
 export class AppModule {}

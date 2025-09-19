@@ -16,7 +16,6 @@ export default function TicketPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", form);
   };
 
   return (

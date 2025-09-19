@@ -24,7 +24,7 @@ export default function MainLayout({ children }) {
           <div className="p-6 mt-6">
             {children}
 
-            <div className="bottom-6 flex justify-center items-center space-x-6 text-gray-400 text-sm">
+            <div className="bottom-6 w-full flex justify-center items-center space-x-6 text-gray-400 text-sm">
               <Link href="/dashboard" className="hover:text-white">
                 News
               </Link>

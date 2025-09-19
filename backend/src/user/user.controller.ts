@@ -1,6 +1,16 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -24,5 +34,12 @@ export class UserController {
   @Post()
   create(@Body() body: Partial<User>): Promise<User> {
     return this.userService.create(body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('getUserOrders')
+  async getUserOrders(@Query('id') id: number = 1, @Req() req) {
+    const userId = req.user.userId;
+    return this.userService.findUserById(userId);
   }
 }
