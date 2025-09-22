@@ -82,11 +82,11 @@ export default function LockScreen({ mode }) {
 
         localStorage.removeItem("preLogin");
 
-        const token = data.access_token;
+        const token = data.token;
         const decoded = jwtDecode(token);
 
         localStorage.setItem("access_token_exp", decoded.exp.toString());
-        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("access_token", data.token);
         toast.success("Login successful!");
 
         router.push("/dashboard");

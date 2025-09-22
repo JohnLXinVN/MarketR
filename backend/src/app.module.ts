@@ -9,10 +9,21 @@ import { CvvModule } from './cvv/cvv.module';
 import { CartModule } from './cart/cart.module';
 import { CartItem } from './cart/cart-item.entity';
 import { CvvOrderModule } from './cvv-order/cvv-order.module';
+import { DepositsModule } from './deposits/deposit.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import * as Joi from 'joi';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: Joi.object({
+        BLOCKCYPHER_API_TOKEN: Joi.string().required(),
+        TRONGRID_API_KEY: Joi.string().required(),
+        // Thêm các biến môi trường khác cần xác thực ở đây
+      }),
+    }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST as string,
@@ -29,6 +40,7 @@ import { CvvOrderModule } from './cvv-order/cvv-order.module';
     CvvModule,
     CartModule,
     CvvOrderModule,
+    DepositsModule,
   ],
 })
 export class AppModule {}

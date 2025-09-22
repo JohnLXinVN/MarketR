@@ -1,5 +1,6 @@
 import { CartItem } from 'src/cart/cart-item.entity';
 import { CVV } from 'src/cvv/cvv.entity';
+import { Deposit } from 'src/deposits/entities/deposit.entity';
 import {
   Entity,
   Column,
@@ -38,4 +39,7 @@ export class User {
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.user)
   cartItems: CartItem[];
+
+  @OneToMany(() => Deposit, (deposit) => deposit.user)
+  deposits: Deposit[];
 }

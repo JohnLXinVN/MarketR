@@ -6,11 +6,14 @@ import {
   BadRequestException,
   Get,
   Res,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import * as svgCaptcha from 'svg-captcha';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -30,7 +33,6 @@ export class AuthController {
 
     // lưu text vào session
     session.captchaText = captcha.text;
-    console.log('Generated captcha:', captcha.text);
     res.type('svg');
     return res.send(captcha.data);
   }
@@ -91,10 +93,23 @@ export class AuthController {
       throw new BadRequestException('Invalid 2FA code');
     }
 
-    // ✅ chính thức cấp token
-    return this.authService.issueToken(
+    const access_token = await this.authService.issueToken(
       isValid.user!.id,
       isValid.user!.username,
     );
+
+    // ✅ chính thức cấp token
+    return {
+      token: access_token.access_token,
+      user: isValid.user,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getUser(@Req() req) {
+    const userId = req.user.userId;
+    const user = await this.authService.getUserById(userId);
+    return user;
   }
 }

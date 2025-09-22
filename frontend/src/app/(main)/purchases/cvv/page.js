@@ -15,8 +15,6 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       const response = await api.get(`/orders-cvv?page=${currentPage}`);
-      console.log(currentPage);
-      console.log(response.data);
       setOrderItems(response.data.data);
       setPageCount(response.data.meta.totalPages);
     } catch (err) {

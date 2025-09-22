@@ -123,8 +123,6 @@ export default function CvvPage() {
 
         const response = await api.post("/cvvs/get_list_cvv", params);
 
-        console.log("123", "đã gọi api call");
-
         setCvvList(response.data.data);
         setPageCount(response.data.totalPages);
       } catch (error) {
@@ -178,7 +176,6 @@ export default function CvvPage() {
 
   const handleAddToCart = async (cvvId) => {
     try {
-      console.log("Adding to cart:", cvvId);
       await api.post("/cart", { cvvId });
 
       setItemsInCart((prev) => [...prev, cvvId]);
@@ -252,7 +249,7 @@ export default function CvvPage() {
               </option>
 
               {countries.map((c) => (
-                <option key={c.code} value={c.code} className="bg-[#1a1a1a]">
+                <option key={c.code} value={c.name} className="bg-[#1a1a1a]">
                   {c.name}
                 </option>
               ))}

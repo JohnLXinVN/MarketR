@@ -72,4 +72,12 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
+  async getUserById(id: number) {
+    const user = await this.userRepo.findOne({
+      where: { id },
+    });
+
+    return user;
+  }
 }

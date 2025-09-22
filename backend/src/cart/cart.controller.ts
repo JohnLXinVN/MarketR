@@ -31,8 +31,6 @@ export class CartController {
   async addToCart(@Body() createCartItemDto: CreateCartItemDto, @Req() req) {
     const userId = req.user.userId;
 
-    console.log('User ID:', userId);
-    console.log('CVV ID to add:', createCartItemDto.cvvId);
     return this.cartService.add(createCartItemDto.cvvId, userId);
   }
 

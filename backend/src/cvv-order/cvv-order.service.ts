@@ -96,7 +96,6 @@ export class OrdersCVVService {
           lock: { mode: 'pessimistic_write' },
         });
 
-        console.log('cvvsToPurchase', cvvsToPurchase);
 
         if (cvvsToPurchase.some((cvv) => !cvv.isAvailable)) {
           throw new BadRequestException(
@@ -115,8 +114,6 @@ export class OrdersCVVService {
           0,
         );
 
-        console.log('Total Amount:', totalAmount);
-        console.log('User Wallet Balance:', user.walletBalance);
         if (Number(user.walletBalance) < totalAmount) {
           throw new BadRequestException('Insufficient wallet balance.');
         }

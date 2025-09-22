@@ -8,12 +8,36 @@ import {
   FaRegBell,
   FaExpand,
 } from "react-icons/fa";
+import { useUser } from "../contexts/UserContext";
+import { useSocket } from "../contexts/SocketContext";
 
 export default function Header() {
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const { user } = useUser();
+
+  const [balance, setBalance] = useState(user.walletBalance); // Số dư ban đầu
+  const socket = useSocket();
 
   const [open, setOpenDropBox] = useState(false);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    setBalance(user.walletBalance);
+  }, [user]);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện 'balanceUpdated' từ server
+    socket.on("balanceUpdated", (data) => {
+      console.log("Received balance update:", data);
+      setBalance(data.walletBalance);
+      // Có thể hiển thị một thông báo "Nạp tiền thành công!" ở đây
+    });
+
+    // Dọn dẹp listener khi component unmount
+    return () => {
+      socket.off("balanceUpdated");
+    };
+  }, [socket]);
 
   // đóng khi click ngoài
   useEffect(() => {
@@ -83,7 +107,7 @@ export default function Header() {
             onClick={() => setOpenDropBox(!open)}
             className="px-3 cursor-pointer py-1 bg-white/10 rounded-md"
           >
-            1$
+            {user ? `$${Number(balance).toFixed(2)}` : "Loading..."}
           </div>
           {open && (
             <div className="absolute right-5 mt-2 w-40 bg-white text-black rounded shadow-lg z-50">

@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import api from "../../../utils/api";
 import { useConfirm } from "../../../components/ConfirmDialog";
 import { toast } from "react-hot-toast";
-
+import { useUser } from "@/contexts/UserContext";
 // Component con để hiển thị trạng thái loading hoặc lỗi
 
 export default function CartPage() {
@@ -16,6 +16,7 @@ export default function CartPage() {
   const { confirm, ConfirmDialog } = useConfirm();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [orderError, setOrderError] = useState(null);
+  const { updateUser } = useUser();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -24,7 +25,6 @@ export default function CartPage() {
 
         const response = await api.get("/cart/cart-items");
 
-        console.log("Cart data:", response.data);
 
         setCartItems(response.data);
       } catch (err) {
@@ -138,6 +138,8 @@ export default function CartPage() {
       });
 
       const newBalance = response.data.newBalance;
+
+      updateUser({ walletBalance: newBalance });
 
       const cartItemIdsToRemove = itemsToCheckout.map((item) => item.id);
 
