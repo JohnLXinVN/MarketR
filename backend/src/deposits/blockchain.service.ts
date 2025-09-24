@@ -70,7 +70,6 @@ export class BlockchainService {
   private axiosInstance: AxiosInstance;
   private blockcypherToken?: string;
   private trongridApiKey?: string;
-  private eventsGateway: EventsGateway;
 
   constructor(
     @InjectRepository(Deposit)
@@ -79,6 +78,7 @@ export class BlockchainService {
     private paymentAddressRepository: Repository<PaymentAddress>,
     private dataSource: DataSource,
     private configService: ConfigService,
+    private readonly eventsGateway: EventsGateway,
   ) {
     this.axiosInstance = axios.create({ timeout: 10000 });
     // add retry (mình đã có axiosRetry import ở trên)

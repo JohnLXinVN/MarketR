@@ -87,8 +87,9 @@ export class DepositsService {
   }
 
   async getUserDeposits(userId: number): Promise<Deposit[]> {
+    console.log('Fetching deposits for userId:', userId);
     return this.depositRepository.find({
-      where: { id: userId },
+      where: { userId: userId },
       order: { createdAt: 'DESC' },
       take: 20,
     });

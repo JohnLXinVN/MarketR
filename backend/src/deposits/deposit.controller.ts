@@ -35,7 +35,7 @@ export class DepositsController {
 
   @Get('/history')
   async getDepositHistory(@Req() req) {
-    const userId = Number(req.user.userId);
+    const userId = req.user.userId;
     return this.depositsService.getUserDeposits(userId);
   }
 }

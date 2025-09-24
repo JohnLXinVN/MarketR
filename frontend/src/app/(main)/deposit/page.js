@@ -11,6 +11,12 @@ const PAYMENT_METHODS = [
   { value: "usdt", label: "USDT (TRC20)" },
 ];
 
+const EXPLORER_URLS = {
+  btc: "https://www.blockchain.com/btc/tx/",
+  ltc: "https://blockchair.com/litecoin/transaction/",
+  usdt: "https://tronscan.org/#/transaction/", // USDT TRC20 dùng Tronscan
+};
+
 const bonusTiers = [
   { label: "Over than 200$", bonus: "+5 %", color: "bg-white/10" },
 
@@ -40,6 +46,8 @@ export default function DepositPage() {
   const fetchOrders = useCallback(async () => {
     try {
       const { data } = await api.get(`/deposits/history`);
+
+      console.log("Fetched orders:", data);
       setOrders(data);
     } catch (error) {
       console.error("Failed to fetch orders", error);
@@ -228,35 +236,47 @@ export default function DepositPage() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => (
-              <tr key={o.id} className="text-center hover:bg-white/10">
-                <td className="p-2 border border-white/10">{o.id}</td>
-                <td className="p-2 border border-white/10 text-green-400">
-                  {o.status}
-                </td>
-                <td className="p-2 border border-white/10">
-                  {format(new Date(o.createdAt), "PPpp")}
-                </td>
-                <td className="p-2 border border-white/10">
-                  {o.currency.toUpperCase()}
-                </td>
-                <td className="p-2 border border-white/10">
-                  {o.amountUSD ? `$${o.amountUSD.toFixed(2)}` : "N/A"}
-                </td>
-                <td className="p-2 border border-white/10">
-                  {o.amountCrypto || "N/A"}
-                </td>
-                <td className="p-2 border border-white/10">
-                  {o.transactionHash ? (
-                    <a href="#" className="text-blue-400 hover:underline">
-                      View
-                    </a>
-                  ) : (
-                    "N/A"
-                  )}
-                </td>
-              </tr>
-            ))}
+            {orders.map((o) => {
+              const explorerUrl = EXPLORER_URLS[o.currency.toLowerCase()];
+              const transactionLink = o.transactionHash
+                ? `${explorerUrl}${o.transactionHash}`
+                : "#";
+
+              return (
+                <tr key={o.id} className="text-center hover:bg-white/10">
+                  <td className="p-2 border border-white/10">{o.id}</td>
+                  <td className="p-2 border border-white/10 text-green-400">
+                    {o.status}
+                  </td>
+                  <td className="p-2 border border-white/10">
+                    {format(new Date(o.createdAt), "PPpp")}
+                  </td>
+                  <td className="p-2 border border-white/10">
+                    {o.currency.toUpperCase()}
+                  </td>
+                  <td className="p-2 border border-white/10">
+                    {o.amountUSD ? `$${o.amountUSD.toFixed(2)}` : "N/A"}
+                  </td>
+                  <td className="p-2 border border-white/10">
+                    {o.amountCrypto || "N/A"}
+                  </td>
+                  <td className="p-2 border border-white/10">
+                    {o.transactionHash ? (
+                      <a
+                        href={transactionLink}
+                        target="_blank" // Mở trong tab mới
+                        rel="noopener noreferrer" // Tăng cường bảo mật
+                        className="text-blue-400 hover:underline"
+                      >
+                        View
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
