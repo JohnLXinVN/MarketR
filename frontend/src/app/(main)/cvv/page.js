@@ -208,7 +208,7 @@ export default function CvvPage() {
     <div className="flex-1 bg-center pt-4 pl-6 pr-6 pb-10 text-[rgba(255,255,255,0.85)]">
       {/* Filter Form */}
       <div className="p-6">
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Tất cả các input filter đều dùng handleFilterChange */}
           {/* Bins */}
           <div>
@@ -249,7 +249,7 @@ export default function CvvPage() {
               </option>
 
               {countries.map((c) => (
-                <option key={c.code} value={c.name} className="bg-[#1a1a1a]">
+                <option key={c.code} value={c.code} className="bg-[#1a1a1a]">
                   {c.name}
                 </option>
               ))}
@@ -483,13 +483,13 @@ export default function CvvPage() {
           <div className="mb-4">
             <button
               onClick={handleBulkAddToCart}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded"
+              className="bg-blue-600 cursor-pointer hover:bg-blue-500 text-white font-bold py-2 px-4 rounded"
             >
               Add to Cart ({selectedItems.length})
             </button>
           </div>
         )}
-        <table className="w-full border border-white/20 text-sm">
+        <table className="w-full  border border-white/20 text-[12px]">
           {/* ... thead ... */}
           <thead className="bg-white/10">
             <tr>

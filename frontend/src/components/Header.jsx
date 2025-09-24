@@ -11,9 +11,11 @@ import {
 import { useUser } from "../contexts/UserContext";
 import { useSocket } from "../contexts/SocketContext";
 
-export default function Header() {
+export default function Header({ onToggleSidebar }) {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { user } = useUser();
+
+  if (!user) return null; // 🚀 Đợi AuthGuard resolve user
 
   const [balance, setBalance] = useState(user.walletBalance); // Số dư ban đầu
   const socket = useSocket();
@@ -82,16 +84,31 @@ export default function Header() {
   return (
     <header className="h-14 bg-black/40 border-b border-white/10 flex items-center justify-between px-6">
       {/* Logo */}
-      <h1 className="text-lg font-bold tracking-wide">
-        <img src="/images/namepage.png" alt="" />
-      </h1>
+
+      <div className="flex items-center gap-3">
+        {/* Hamburger chỉ hiện mobile */}
+        <button
+          className="lg:hidden text-xl cursor-pointer"
+          onClick={onToggleSidebar}
+        >
+          ☰
+        </button>
+        <h1 className="text-lg font-bold tracking-wide">
+          <img src="/images/namepage.png" alt="" />
+        </h1>
+      </div>
 
       {/* Actions */}
       <div className="flex items-center gap-5 text-lg">
-        <FaEnvelope className="cursor-pointer hover:text-blue-400" />
+        <Link
+          href="/support/tickets"
+          className="cursor-pointer hover:text-blue-400"
+        >
+          <FaEnvelope />
+        </Link>
         <Link
           href="/cart"
-          aria-label="Đi tới giỏ hàng"
+          aria-label=""
           className="cursor-pointer hover:text-blue-400"
         >
           <FaShoppingCart className="cursor-pointer" />

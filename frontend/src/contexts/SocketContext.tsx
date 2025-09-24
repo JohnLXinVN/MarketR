@@ -16,6 +16,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   // Giả sử bạn có cách lấy thông tin user đã đăng nhập
 
   const { user } = useUser();
+
+  if (!user) return null; // 🚀 Đợi AuthGuard resolve user
   const userId = user.id;
   const currentUser = { id: userId }; // <-- Thay bằng logic lấy user thật
 

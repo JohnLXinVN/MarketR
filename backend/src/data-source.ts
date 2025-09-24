@@ -2,6 +2,10 @@
 import { DataSource } from 'typeorm';
 import { CVV } from './cvv/cvv.entity';
 import { configDotenv } from 'dotenv';
+import { CartItem } from './cart/cart-item.entity';
+import { User } from './user/user.entity';
+import { Deposit } from './deposits/entities/deposit.entity';
+import { Log } from './logs-feature/log.entity';
 
 configDotenv();
 export const AppDataSource = new DataSource({
@@ -11,7 +15,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER as string,
   password: process.env.DB_PASS as string,
   database: process.env.DB_NAME as string,
-  entities: [CVV],
+  entities: [CVV, Log, CartItem, User, Deposit],
   synchronize: true, // chỉ bật khi dev
   logging: false,
 });

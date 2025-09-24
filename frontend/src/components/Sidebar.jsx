@@ -14,12 +14,16 @@ import {
 } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useUser } from "../contexts/UserContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState([]);
   const [open, setOpenDropBox] = useState(false);
   const dropdownRef = useRef(null);
+  const { user } = useUser();
+
+  if (!user) return null; // 🚀 Đợi AuthGuard resolve user
 
   const access_token = localStorage.getItem("access_token");
   const tokenDecoded = jwtDecode(access_token);
@@ -52,7 +56,10 @@ export default function Sidebar() {
     {
       label: "Tools",
       icon: <FaCog />,
-      children: [{ label: "Checker", href: "/tools/checker" }],
+      children: [
+        { label: "Checker", href: "/tools/checker" },
+        { label: "Convert", href: "/tools/cookie-converter" },
+      ],
     },
     {
       label: "My Purchases",
@@ -72,7 +79,7 @@ export default function Sidebar() {
   return (
     <aside className="w-64 border-r border-white/10 flex flex-col bg-[#0b1a27]">
       {/* User Info */}
-      <div className="py-4 px-5" ref={dropdownRef}>
+      <div className="py-4 px-5 lg:mt-0 mt-7" ref={dropdownRef}>
         <div
           onClick={() => setOpenDropBox(!open)}
           className="flex items-center gap-3 py-3 px-2 cursor-pointer border-b bg-[rgba(255,255,255,.1)] border-white/10"
@@ -192,9 +199,12 @@ export default function Sidebar() {
 
       {/* CTA */}
       <div className="p-4">
-        <button className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">
+        <Link
+          href="/earn-money"
+          className="w-full block text-center cursor-pointer bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md"
+        >
           Earn money
-        </button>
+        </Link>
       </div>
     </aside>
   );

@@ -12,6 +12,9 @@ import { CvvOrderModule } from './cvv-order/cvv-order.module';
 import { DepositsModule } from './deposits/deposit.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import * as Joi from 'joi';
+import { LogsModule } from './logs-feature/logs.module';
+import { LogsOrderModule } from './log-order/log-order.module';
+import { TicketModule } from './ticket/ticket.module';
 
 @Module({
   imports: [
@@ -41,6 +44,9 @@ import * as Joi from 'joi';
     CartModule,
     CvvOrderModule,
     DepositsModule,
+    LogsModule,
+    LogsOrderModule,
+    TicketModule,
   ],
 })
 export class AppModule {}

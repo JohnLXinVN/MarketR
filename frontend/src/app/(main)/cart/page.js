@@ -25,7 +25,6 @@ export default function CartPage() {
 
         const response = await api.get("/cart/cart-items");
 
-
         setCartItems(response.data);
       } catch (err) {
         const errorMessage =
@@ -157,7 +156,7 @@ export default function CartPage() {
 
       const errorMessage =
         err.response?.data?.message ||
-        "An unexpected error occurred. Please try again.";
+        "Failed to complete order. Please try again.";
       setOrderError(errorMessage);
     } finally {
       setIsCheckingOut(false);

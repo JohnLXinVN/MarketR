@@ -5,6 +5,8 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   MessageBody,
+  WsException,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
@@ -42,15 +44,15 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   @SubscribeMessage('identify')
   handleIdentify(
-    client: Socket,
     @MessageBody() data: { userId: number },
+    @ConnectedSocket() client: Socket,
   ): void {
-    if (data.userId) {
-      this.connectedUsers.set(data.userId, client.id);
-      this.logger.log(
-        `User ${data.userId} identified with socket ${client.id}`,
-      );
+    if (!data || !data.userId) {
+      throw new WsException('Invalid identify payload');
     }
+
+    this.connectedUsers.set(data.userId, client.id);
+    this.logger.log(`User ${data.userId} identified with socket ${client.id}`);
   }
 
   /**

@@ -94,7 +94,7 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-4 py-2">{item.expiryDate}</td>
                     <td className="px-4 py-2">
-                      <span className="px-3 py-1 rounded bg-green-600 text-white text-xs">
+                      <span className="px-3 py-1 rounded  text-white text-xs">
                         {item.status}
                       </span>
                     </td>
@@ -112,12 +112,16 @@ export default function OrdersPage() {
               marginPagesDisplayed={2}
               pageRangeDisplayed={3}
               onPageChange={handlePageClick}
-              containerClassName="flex justify-center items-center space-x-2 p-4"
-              pageClassName="px-3 py-1 border border-gray-600 cursor-pointer rounded bg-[#132b4a] hover:bg-blue-600"
-              previousClassName="px-3 py-1 border border-gray-600 cursor-pointer rounded bg-[#132b4a] hover:bg-blue-600"
-              nextClassName="px-3 py-1 border border-gray-600 cursor-pointer rounded bg-[#132b4a] hover:bg-blue-600"
-              breakClassName="px-3 py-1"
-              activeClassName="bg-blue-600 border-blue-500"
+              containerClassName="flex justify-center items-center space-x-2 mt-6"
+              pageClassName="w-8 h-8"
+              pageLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
+              previousClassName="w-8 h-8"
+              previousLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
+              nextClassName="w-8 h-8"
+              nextLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600 cursor-pointer"
+              breakClassName="w-8 h-8"
+              breakLinkClassName="flex w-full h-full items-center justify-center rounded border border-gray-600"
+              activeLinkClassName="bg-blue-600 border-blue-600 text-white"
               renderOnZeroPageCount={null}
             />
           )}

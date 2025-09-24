@@ -1,3 +1,6 @@
+"use client";
+import Link from "next/link";
+
 export default function CheckerPage() {
   return (
     <div className="flex flex-col items-center justify-center p-10 w-full  text-[rgba(255,255,255,0.85)]">
@@ -10,9 +13,12 @@ export default function CheckerPage() {
           <span className="text-red-500 font-semibold">please add $100</span> to
           your balance. This is a one-time payment for activation
         </p>
-        <button className="px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 transition font-semibold">
-          payment Page
-        </button>
+        <Link
+          href="/deposit"
+          className="px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 transition font-semibold"
+        >
+          Payment Page
+        </Link>
       </div>
 
       {/* Footer */}

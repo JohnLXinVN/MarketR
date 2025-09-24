@@ -1,6 +1,7 @@
 import { CartItem } from 'src/cart/cart-item.entity';
 import { CVV } from 'src/cvv/cvv.entity';
 import { Deposit } from 'src/deposits/entities/deposit.entity';
+import { LogOrder } from 'src/log-order/log-order.entity';
 import {
   Entity,
   Column,
@@ -42,4 +43,7 @@ export class User {
 
   @OneToMany(() => Deposit, (deposit) => deposit.user)
   deposits: Deposit[];
+
+  @OneToMany(() => LogOrder, (order) => order.user)
+  logOrders: LogOrder[];
 }

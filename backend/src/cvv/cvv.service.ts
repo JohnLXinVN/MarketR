@@ -196,7 +196,7 @@ export class CvvService {
   async getFilterOptions() {
     // Lấy giá min và max
     const priceRangeQuery = this.cvvRepository
-      .createQueryBuilder('cvv')
+      .createQueryBuilder('cvvs')
       .select('MIN(cvvs.price)', 'min')
       .addSelect('MAX(cvvs.price)', 'max')
       .where('cvvs.isAvailable = :isAvailable', { isAvailable: true });
@@ -206,7 +206,7 @@ export class CvvService {
     // Lấy danh sách các giá trị duy nhất cho các trường khác
     const getDistinctValues = async (field: keyof CVV) => {
       const result = await this.cvvRepository
-        .createQueryBuilder('cvv')
+        .createQueryBuilder('cvvs')
         .select(`DISTINCT ${String(field)}`)
         .where(`${String(field)} IS NOT NULL`)
         .andWhere('cvvs.isAvailable = :isAvailable', { isAvailable: true })
