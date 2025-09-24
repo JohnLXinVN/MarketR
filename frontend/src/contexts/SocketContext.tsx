@@ -24,7 +24,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Khi socket kết nối, gửi thông tin định danh
     socket.on("connect", () => {
-      console.log("Connected to WebSocket server");
+      console.log("");
       // Gửi sự kiện "identify" để backend biết user nào đang kết nối
       if (currentUser?.id) {
         socket.emit("identify", { userId: currentUser.id });
@@ -32,7 +32,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server");
+      console.log("");
     });
 
     // Dọn dẹp khi component unmount

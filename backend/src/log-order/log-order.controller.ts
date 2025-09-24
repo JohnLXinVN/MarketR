@@ -53,13 +53,11 @@ export class LogsOrderController {
     const userId = req.user.userId;
     // Lấy chi tiết file từ service
 
-    console.log('Download log id', id, 'for userId', userId);
     const { filePath, fileName, fileSizeInBytes } =
       await this.logsOrderService.getDownloadPath(id, userId);
 
     const fileStream = createReadStream(filePath);
 
-    // **ĐIỀU KHIỂN METADATA TẠI ĐÂY**
     res.set({
       'Content-Type': 'application/zip',
       // Header này quyết định TÊN file khi người dùng tải về

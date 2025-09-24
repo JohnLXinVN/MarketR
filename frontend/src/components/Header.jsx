@@ -19,7 +19,7 @@ export default function Header({ onToggleSidebar }) {
 
   const [balance, setBalance] = useState(user.walletBalance); // Số dư ban đầu
   const socket = useSocket();
-
+  const [scrolled, setScrolled] = useState(false);
   const [open, setOpenDropBox] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -30,7 +30,6 @@ export default function Header({ onToggleSidebar }) {
   useEffect(() => {
     // Lắng nghe sự kiện 'balanceUpdated' từ server
     socket.on("balanceUpdated", (data) => {
-      console.log("Received balance update:", data);
       setBalance(data.walletBalance);
       // Có thể hiển thị một thông báo "Nạp tiền thành công!" ở đây
     });
@@ -81,8 +80,24 @@ export default function Header({ onToggleSidebar }) {
     }
   };
 
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="h-14 bg-black/40 border-b border-white/10 flex items-center justify-between px-6">
+    <header
+      className={`h-14 ${
+        scrolled ? "bg-[rgba(0,0,0,0.96)]" : "bg-[rgba(0,0,0,0.4)]"
+      } border-b border-white/10 transition flex items-center justify-between px-6`}
+    >
       {/* Logo */}
 
       <div className="flex items-center gap-3">

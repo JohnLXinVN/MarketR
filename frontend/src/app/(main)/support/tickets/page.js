@@ -37,7 +37,6 @@ export default function TicketPage() {
     if (Object.keys(newErrors).length === 0) {
       try {
         const res = await api.post("/tickets", form); // 🔹 gọi API qua axios instance
-        console.log("✅ Ticket created:", res.data);
         setSuccess("Ticket created successfully!");
         setForm({
           reason: "",

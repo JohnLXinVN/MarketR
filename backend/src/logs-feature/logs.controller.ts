@@ -24,7 +24,6 @@ export class LogsController {
     @Body(new ValidationPipe({ transform: true, forbidNonWhitelisted: true }))
     queryDto: QueryLogsDto,
   ) {
-    console.log('Search Logs with DTO:', queryDto);
     return this.logsService.search(queryDto);
   }
 

@@ -77,8 +77,6 @@ export class LogsOrderService {
         lock: { mode: 'pessimistic_write' },
       });
 
-      console.log('User balance:', user);
-
       if (Number(user!.walletBalance) < Number(log.price)) {
         throw new ForbiddenException('Insufficient funds.');
       }

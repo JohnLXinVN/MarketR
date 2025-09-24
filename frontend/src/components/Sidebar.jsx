@@ -58,7 +58,7 @@ export default function Sidebar() {
       icon: <FaCog />,
       children: [
         { label: "Checker", href: "/tools/checker" },
-        { label: "Convert", href: "/tools/cookie-converter" },
+        { label: "Converter", href: "/tools/cookie-converter" },
       ],
     },
     {

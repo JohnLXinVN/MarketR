@@ -102,8 +102,6 @@ export default function LogsPage() {
         limit: 10,
       });
 
-      console.log("Fetched logs:", activeFilters);
-
       setLogs(response.data.data || []);
       setPagination({
         page: response.data.page,
@@ -153,7 +151,6 @@ export default function LogsPage() {
 
   const handleBuyClick = async (logToBuy) => {
     if (buyingLogId) return; // Không cho mua nếu đang có giao dịch khác
-    console.log("Attempting to buy log:", logToBuy);
 
     const isConfirmed = await confirm({
       title: "Remove Items",

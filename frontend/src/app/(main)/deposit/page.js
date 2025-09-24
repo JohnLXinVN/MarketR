@@ -79,7 +79,6 @@ export default function DepositPage() {
         currency,
       });
       setDepositInfo(data);
-      console.log("data: ", data);
       await fetchPoolStatus();
     } catch (error) {
       alert(error.response?.data?.message || "An error occurred.");

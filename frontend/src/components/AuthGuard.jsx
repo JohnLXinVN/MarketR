@@ -24,7 +24,6 @@ export default function AuthGuard({ children }) {
       const exp = localStorage.getItem("access_token_exp");
 
       if (!token || !exp || Date.now() >= parseInt(exp) * 1000) {
-        console.log("➡️ Token hết hạn hoặc không hợp lệ, redirect...");
         localStorage.removeItem("access_token");
         localStorage.removeItem("access_token_exp");
         setUser(null);
@@ -36,7 +35,6 @@ export default function AuthGuard({ children }) {
       try {
         const response = await api.get("/auth/me");
         setUser(response.data);
-        console.log("✅ Token hợp lệ, đã lấy thông tin user.");
         // Chỉ khi lấy thông tin user thành công, chúng ta mới set isVerified thành true
         setIsVerified(true);
       } catch (error) {
