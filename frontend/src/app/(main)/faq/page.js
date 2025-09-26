@@ -17,11 +17,11 @@ export default function FAQPage() {
           </li>
           <li>Be as nice as possible to our staff.</li>
           <li>
-            Any negativity to Real And Rare staff members may cost you your
+            Any negativity to Russian Market staff members may cost you your
             account.
           </li>
           <li>If you cannot connect to our website try changing IP address.</li>
-          <li>All purchased cards will be shown in Orders.</li>
+          <li>All purchased cards will be shown in Purchases.</li>
           <li>
             If you're having any troubles, please double check before contacting
             our support.

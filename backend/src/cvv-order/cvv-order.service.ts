@@ -9,6 +9,7 @@ import { OrderCVV } from './cvv-order.entity';
 import { CVV } from 'src/cvv/cvv.entity';
 import { User } from 'src/user/user.entity';
 import { CartItem } from 'src/cart/cart-item.entity';
+import { BusinessException } from 'src/common/filters/business.exception';
 
 // Define a type for our paginated response
 export interface PaginatedOrdersResult {
@@ -96,7 +97,6 @@ export class OrdersCVVService {
           lock: { mode: 'pessimistic_write' },
         });
 
-
         if (cvvsToPurchase.some((cvv) => !cvv.isAvailable)) {
           throw new BadRequestException(
             'Sorry, one of the CVVs was just purchased by someone else.',
@@ -115,7 +115,7 @@ export class OrdersCVVService {
         );
 
         if (Number(user.walletBalance) < totalAmount) {
-          throw new BadRequestException('Insufficient wallet balance.');
+          throw new BusinessException('Insufficient wallet balance.');
         }
 
         user.walletBalance = Number(user.walletBalance) - totalAmount;

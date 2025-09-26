@@ -15,8 +15,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useUser } from "../contexts/UserContext";
+import { useRouteLoading } from "./useRouteLoading";
 
-export default function Sidebar() {
+export default function Sidebar({ onLinkClick }) {
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState([]);
   const [open, setOpenDropBox] = useState(false);
@@ -76,6 +77,8 @@ export default function Sidebar() {
     },
   ];
 
+  const { loading, startLoading } = useRouteLoading();
+
   return (
     <aside className="w-64 border-r border-white/10 flex flex-col bg-[#0b1a27]">
       {/* User Info */}
@@ -99,6 +102,8 @@ export default function Sidebar() {
             <ul className="flex flex-col">
               <li>
                 <Link
+                  onClick={onLinkClick}
+                  prefetch
                   href="/deposit"
                   className="block px-4 py-2 hover:bg-gray-100"
                 >
@@ -160,6 +165,8 @@ export default function Sidebar() {
                       const childActive = pathname === child.href;
                       return (
                         <Link
+                          onClick={onLinkClick}
+                          prefetch
                           key={child.href}
                           href={child.href}
                           className={`block text-sm text-[rgba(255,255,255,.85)] px-3 py-2 rounded-md transition 
@@ -181,6 +188,8 @@ export default function Sidebar() {
 
           return (
             <Link
+              onClick={onLinkClick}
+              prefetch
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 w-full text-[rgba(255,255,255,.85)] hover:text-white px-3 py-2 rounded-md transition 
@@ -200,6 +209,8 @@ export default function Sidebar() {
       {/* CTA */}
       <div className="p-4">
         <Link
+          onClick={onLinkClick}
+          prefetch
           href="/earn-money"
           className="w-full block text-center cursor-pointer bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md"
         >

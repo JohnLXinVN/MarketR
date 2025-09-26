@@ -2,6 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import { BusinessExceptionFilter } from './common/filters/business-exception.filter';
+import { CustomLogger } from './common/filters/custom-logger';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

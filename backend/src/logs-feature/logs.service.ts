@@ -53,7 +53,7 @@ export class LogsService {
       });
     }
     if (filters.zip) {
-      queryBuilder.andWhere('log.zip = :zip', { zip: filters.zip });
+      queryBuilder.andWhere('log.zip LIKE :zip', { zip: `%${filters.zip}` });
     }
     if (filters.isp) {
       queryBuilder.andWhere('log.isp LIKE :isp', { isp: `%${filters.isp}%` });

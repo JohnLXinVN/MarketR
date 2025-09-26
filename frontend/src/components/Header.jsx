@@ -11,7 +11,7 @@ import {
 import { useUser } from "../contexts/UserContext";
 import { useSocket } from "../contexts/SocketContext";
 
-export default function Header({ onToggleSidebar }) {
+export default function Header({ onToggleSidebar, onLinkClick }) {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { user } = useUser();
 
@@ -116,12 +116,16 @@ export default function Header({ onToggleSidebar }) {
       {/* Actions */}
       <div className="flex items-center gap-5 text-lg">
         <Link
+          onClick={onLinkClick}
+          prefetch
           href="/support/tickets"
           className="cursor-pointer hover:text-blue-400"
         >
           <FaEnvelope />
         </Link>
         <Link
+          onClick={onLinkClick}
+          prefetch
           href="/cart"
           aria-label=""
           className="cursor-pointer hover:text-blue-400"

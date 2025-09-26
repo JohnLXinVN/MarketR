@@ -1,196 +1,142 @@
-// src/seeds/cvv.seeder.ts
-import { AppDataSource } from '../data-source'; // path tới file data-source của bạn
+// src/seeders/cvv.seed.ts
 import { CVV } from 'src/cvv/cvv.entity';
-import { DeepPartial } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { binList, localizedSeedData } from './bin-list.data';
 
-const countryMap: Record<
-  string,
-  { states: string[]; cities: string[]; zipPrefix?: string }
-> = {
-  US: {
-    states: ['California', 'New York', 'Texas', 'Florida', 'Illinois'],
-    cities: ['Los Angeles', 'New York', 'Houston', 'Miami', 'Chicago'],
-    zipPrefix: '9',
-  },
-  UK: {
-    states: ['England', 'Scotland'],
-    cities: ['London', 'Manchester', 'Edinburgh'],
-    zipPrefix: 'E',
-  },
-  CA: {
-    states: ['Ontario', 'Quebec'],
-    cities: ['Toronto', 'Montreal'],
-    zipPrefix: 'M',
-  },
-  JP: {
-    states: ['Tokyo', 'Osaka'],
-    cities: ['Tokyo', 'Osaka'],
-    zipPrefix: '1',
-  },
-  IN: {
-    states: ['Maharashtra', 'Delhi'],
-    cities: ['Mumbai', 'New Delhi'],
-    zipPrefix: '4',
-  },
-  SG: {
-    states: ['Singapore'],
-    cities: ['Singapore'],
-  },
-  AU: {
-    states: ['NSW', 'VIC'],
-    cities: ['Sydney', 'Melbourne'],
-    zipPrefix: '2',
-  },
-  IE: {
-    states: ['Dublin'],
-    cities: ['Dublin'],
-  },
-  BR: {
-    states: ['São Paulo'],
-    cities: ['São Paulo'],
-  },
-  AR: {
-    states: ['Buenos Aires'],
-    cities: ['Buenos Aires'],
-  },
-};
+export class CvvSeeder {
+  private sellerNames = [
+    'John Doe',
+    'Jane Smith',
+    'Michael Johnson',
+    'Emily Davis',
+    'Chris Brown',
+    'Laura Wilson',
+    'Daniel Miller',
+    'Sophia Anderson',
+    'James Taylor',
+    'Olivia Thomas',
+    'David Lee',
+    'Emma Harris',
+    'Matthew White',
+    'Isabella Martin',
+    'Andrew Thompson',
+    'Mia Garcia',
+    'William Martinez',
+    'Charlotte Robinson',
+    'Benjamin Clark',
+    'Amelia Rodriguez',
+  ];
 
-function randomFrom<T>(arr: T[]) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+  public async run(dataSource: DataSource): Promise<void> {
+    const cvvRepository = dataSource.getRepository(CVV);
+    const cvvsToCreate: Partial<CVV>[] = [];
 
-function genBin16(prefix?: string) {
-  const base = prefix ?? String(Math.floor(400000 + Math.random() * 500000));
-  const first6 = base.padEnd(6, '0').slice(0, 6);
-  const rest = Array.from({ length: 10 }, () =>
-    Math.floor(Math.random() * 10),
-  ).join('');
-  return (first6 + rest).slice(0, 16);
-}
+    console.log('📦 Generating 3000 CVV records...');
+    const totalCVV = 4000;
 
-function genExpiry() {
-  const year =
-    (new Date().getFullYear() % 100) + 1 + Math.floor(Math.random() * 5); // yy
-  const month = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0');
-  return `${month}/${String(year).padStart(2, '0')}`; // MM/YY
-}
+    for (let i = 0; i < totalCVV; i++) {
+      // 1️⃣ Chọn BIN ngẫu nhiên
+      const binData = binList[Math.floor(Math.random() * binList.length)];
 
-function makeDataSource(bin16: string, bankKey: string) {
-  const first6 = bin16.slice(0, 6);
-  const next8 = bin16.slice(6, 14);
-  return `DB_BANK_${bankKey}_${first6}_${next8}`;
-}
+      // 2️⃣ Sinh số thẻ ngẫu nhiên (giả lập)
+      const randomDigits = Math.floor(1000000000 + Math.random() * 9000000000);
+      const cardNumber = `${binData.bin}${randomDigits}`.slice(0, 16);
 
-export async function runSeeder() {
-  await AppDataSource.initialize();
-  const repo = AppDataSource.getRepository(CVV);
+      // 3️⃣ Dữ liệu địa phương theo quốc gia BIN
+      const localized =
+        localizedSeedData[binData.country] || localizedSeedData['US'];
+      const cardHolder = this.randomItem<string>(
+        localized.cardHolders as string[],
+      );
+      const state = this.randomItem<string>(localized.states as string[]);
+      const city = this.randomItem<string>(localized.cities as string[]);
+      const zip = this.randomItem<string>(localized.zips as string[]);
+      const address = this.randomItem<string>(localized.addresses as string[]);
 
-  const count = await repo.count();
-  if (count > 0) {
-    console.log('⚠️ CVV table already has data, skipping seeding...');
-    await AppDataSource.destroy();
-    return;
+      // 4️⃣ CVV ngẫu nhiên 3 chữ số
+      const cvvCode = Math.floor(100 + Math.random() * 900);
+
+      // 5️⃣ Ngày hết hạn trong 1–5 năm tới
+      const expiryDate = this.randomExpiryDate();
+
+      // 6️⃣ Giá ngẫu nhiên 12.00 - 200.00
+      const price = parseFloat((12 + Math.random() * (200 - 12)).toFixed(2));
+
+      // 7️⃣ DataSource: DB_<BIN>_<8 random số>
+      const dataSourceStr = `DB_${binData.bin}_${Math.floor(10000000 + Math.random() * 90000000)}`;
+
+      // 8️⃣ Seller ngẫu nhiên
+      const sellerName = this.randomItem(this.sellerNames);
+
+      // 9️⃣ createdAt / updatedAt: random từ 2 năm trước đến hiện tại
+      const createdAt = this.randomDateInPast(2);
+      const updatedAt = this.randomDateAfter(createdAt);
+
+      const newCvv: Partial<CVV> = {
+        binNumber: cardNumber,
+        issuingBank: binData.bank,
+        cardHolder,
+        CVV: cvvCode,
+        cardType: binData.type,
+        cardClass: binData.class,
+        cardLevel: binData.level,
+        expiryDate,
+        country: binData.country,
+        state,
+        city,
+        zip,
+        price,
+        isAvailable: true,
+        dataSource: dataSourceStr,
+        sellerName,
+        specificAddress: address,
+        hasSsn: Math.random() < 0.25,
+        hasDob: Math.random() < 0.35,
+        createdAt,
+        updatedAt,
+      };
+
+      cvvsToCreate.push(newCvv);
+    }
+
+    console.log('⏫ Inserting into DB...');
+    for (let i = 0; i < cvvsToCreate.length; i += 500) {
+      await cvvRepository.insert(cvvsToCreate.slice(i, i + 500));
+      console.log(
+        `  • Inserted ${Math.min(i + 500, cvvsToCreate.length)}/${cvvsToCreate.length}`,
+      );
+    }
+
+    console.log('🎉 Seeding finished.');
   }
 
-  const banks = [
-    { name: 'Bank of America', key: 'BOA' },
-    { name: 'Chase', key: 'CHASE' },
-    { name: 'Wells Fargo', key: 'WF' },
-    { name: 'Citi', key: 'CITI' },
-    { name: 'HSBC', key: 'HSBC' },
-    { name: 'Santander', key: 'SANT' },
-    { name: 'ANZ', key: 'ANZ' },
-    { name: 'ICICI', key: 'ICICI' },
-    { name: 'MUFG', key: 'MUFG' },
-    { name: 'Barclays', key: 'BARC' },
-  ];
-
-  const cardTypes = [
-    'VISA',
-    'MASTERCARD',
-    'AMEX',
-    'DISCOVER',
-    'JCB',
-    'MAESTRO',
-  ];
-  const cardClasses = ['CREDIT', 'DEBIT'];
-  const cardLevels = ['STANDARD', 'GOLD', 'PLATINUM', 'SIGNATURE', 'BLACK'];
-
-  const countries = Object.keys(countryMap);
-
-  const cardHolderExamples = [
-    'John Smith',
-    'Maria Garcia',
-    'David Johnson',
-    'Fatima Khan',
-    'Hiroshi Tanaka',
-    'Nguyen Van A',
-    'Priya Patel',
-    "Liam O'Connor",
-    'Sofia Rossi',
-    'Carlos Silva',
-    'Emma Brown',
-    'Isabella Martinez',
-    'Lucas Silva',
-    'Chloe Wilson',
-    'Mohammed Ali',
-  ];
-
-  // **Lưu trữ dữ liệu thô (DeepPartial) thay vì push entities trả về từ repo.create riêng lẻ**
-  const itemsData: DeepPartial<CVV>[] = [];
-
-  for (let i = 0; i < 25; i++) {
-    const country = randomFrom(countries);
-    const meta = countryMap[country];
-    const state = randomFrom(meta.states);
-    const city = randomFrom(meta.cities);
-    const bank = randomFrom(banks);
-
-    const bin16 = genBin16(String(400000 + ((i * 7) % 600000)));
-    const price = parseFloat((Math.random() * 25 + 8).toFixed(2));
-    const expiryDate = genExpiry();
-    const cardType = randomFrom(cardTypes);
-    const cardClass = randomFrom(cardClasses);
-    const cardLevel = randomFrom(cardLevels);
-    const userNameCard = randomFrom(cardHolderExamples);
-
-    const dataSource = makeDataSource(bin16, bank.key);
-    const CVV = Math.floor(Math.random() * 900) + 100;
-    const rec: DeepPartial<CVV> = {
-      binNumber: bin16,
-      issuingBank: bank.name,
-      cardType,
-      cardClass,
-      cardLevel,
-      expiryDate,
-      country,
-      state,
-      city,
-      zip: meta.zipPrefix ? `${meta.zipPrefix}${100 + i}` : `${1000 + i}`,
-      price,
-      isAvailable: Math.random() > 0.05,
-      dataSource,
-      sellerName: bank.name,
-      hasSsn: Math.random() > 0.6,
-      hasDob: Math.random() > 0.5,
-      cardHolder: userNameCard, // your requested field
-      CVV,
-    };
-
-    itemsData.push(rec);
+  // 🔧 Helper functions
+  private randomItem<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  // TẠO ENTITIES 1 lần từ mảng dữ liệu thô
-  const entities = repo.create(itemsData); // returns CVV[]
-  await repo.save(entities);
-  console.log('✅ Seeded 25 CVV items successfully!');
-  await AppDataSource.destroy();
-}
+  private randomExpiryDate(): string {
+    const currentYear = new Date().getFullYear();
+    const futureYear = currentYear + 1 + Math.floor(Math.random() * 5);
+    const month = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0');
+    const yearShort = String(futureYear).slice(-2);
+    return `${month}/${yearShort}`;
+  }
 
-// nếu chạy trực tiếp bằng ts-node
-if (require.main === module) {
-  runSeeder().catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+  private randomDateInPast(yearsBack: number): Date {
+    const now = new Date();
+    const past = new Date();
+    past.setFullYear(now.getFullYear() - yearsBack);
+    return new Date(
+      past.getTime() + Math.random() * (now.getTime() - past.getTime()),
+    );
+  }
+
+  private randomDateAfter(startDate: Date): Date {
+    const now = new Date();
+    return new Date(
+      startDate.getTime() +
+        Math.random() * (now.getTime() - startDate.getTime()),
+    );
+  }
 }

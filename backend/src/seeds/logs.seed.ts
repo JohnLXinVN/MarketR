@@ -1,224 +1,152 @@
-// src/seeds/log.seeder.ts
+import { DataSource } from 'typeorm';
+import { AppDataSource } from 'src/data-source';
 import { Log } from 'src/logs-feature/log.entity';
-import { AppDataSource } from '../data-source'; // Điều chỉnh đường dẫn tới data-source của bạn
-import { DeepPartial } from 'typeorm';
+import { linksPool, localizedSeedData } from './bin-list.data';
 
-/**
- * Cấu trúc dữ liệu địa lý chính xác hơn:
- * Mỗi quốc gia (country) chứa một object các tiểu bang/tỉnh (state).
- * Mỗi state chứa một mảng các thành phố (city) và một tiền tố zip (zipPrefix).
- * Điều này đảm bảo khi chọn state, bạn chỉ có thể chọn city tương ứng trong state đó.
- */
-const locationData: Record<
-  string,
-  Record<string, { cities: string[]; zipPrefix: string }>
-> = {
-  US: {
-    California: {
-      cities: ['Los Angeles', 'San Francisco', 'San Diego', 'Sacramento'],
-      zipPrefix: '9',
-    },
-    'New York': {
-      cities: ['New York City', 'Buffalo', 'Rochester', 'Albany'],
-      zipPrefix: '1',
-    },
-    Texas: {
-      cities: ['Houston', 'Dallas', 'Austin', 'San Antonio'],
-      zipPrefix: '7',
-    },
-    Florida: {
-      cities: ['Miami', 'Orlando', 'Tampa', 'Jacksonville'],
-      zipPrefix: '3',
-    },
-  },
-  VN: {
-    Hanoi: {
-      cities: ['Hoan Kiem', 'Ba Dinh', 'Cau Giay', 'Dong Da'],
-      zipPrefix: '10',
-    },
-    'Ho Chi Minh City': {
-      cities: ['District 1', 'District 3', 'District 7', 'Thu Duc City'],
-      zipPrefix: '70',
-    },
-    'Da Nang': {
-      cities: ['Hai Chau', 'Thanh Khe', 'Son Tra'],
-      zipPrefix: '55',
-    },
-  },
-  CA: {
-    Ontario: {
-      cities: ['Toronto', 'Ottawa', 'Mississauga'],
-      zipPrefix: 'M',
-    },
-    Quebec: {
-      cities: ['Montreal', 'Quebec City', 'Gatineau'],
-      zipPrefix: 'H',
-    },
-  },
-  DE: {
-    Berlin: {
-      cities: ['Berlin'],
-      zipPrefix: '1',
-    },
-    Bavaria: {
-      cities: ['Munich', 'Nuremberg'],
-      zipPrefix: '8',
-    },
-  },
-};
-
-const ispMap: Record<string, string[]> = {
-  US: ['Comcast Xfinity', 'AT&T Internet', 'Verizon Fios', 'Spectrum'],
-  VN: ['VNPT', 'Viettel', 'FPT Telecom', 'CMC Telecom'],
-  CA: ['Bell', 'Rogers', 'Telus', 'Shaw'],
-  DE: ['Deutsche Telekom', 'Vodafone', '1&1', 'O2'],
-};
-
-// --- Helper Functions ---
-
-function randomFrom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function generateEmails(count: number): string[] {
-  const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'protonmail.com'];
-  const names = [
-    'john.doe',
-    'jane.smith',
-    'test.user',
-    'user.dev',
-    'anonymous',
-  ];
-  return Array.from({ length: count }, () => {
-    return `${randomFrom(names)}${Math.floor(Math.random() * 100)}@${randomFrom(domains)}`;
-  });
-}
-
-function generateLinks(count: number): string[] {
-  const sites = [
-    'facebook.com',
-    'google.com',
-    'github.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'twitter.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-    'amazon.com',
-  ];
-  return Array.from(
-    { length: count },
-    () => `https://${randomFrom(sites)}/login?user=test`,
-  );
-}
-
-function generateStruct(): string {
-  const prefixes = ['archive', 'backup', 'data', 'credentials'];
-  const extensions = ['zip', 'rar', '7z'];
-  return `${randomFrom(prefixes)}_${Date.now() % 1000}.${randomFrom(extensions)}`;
-}
-
-// --- Main Seeder Function ---
-
-export async function runLogSeeder() {
-  await AppDataSource.initialize();
-  const repo = AppDataSource.getRepository(Log);
-
-  const count = await repo.count();
-  if (count > 0) {
-    console.log('⚠️ Bảng "logs" đã có dữ liệu, bỏ qua seeding...');
-    await AppDataSource.destroy();
-    return;
+export class LogSeeder {
+  private randomItem<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  const stealers = ['RedLine', 'Vidar', 'Raccoon', 'LokiBot', 'AZORult'];
-  const systems = [
-    'Windows 10 Pro',
-    'Windows 11 Home',
-    'macOS Sonoma',
-    'Ubuntu 22.04',
-  ];
-  const vendors = [
-    'Intel Corporation',
-    'Advanced Micro Devices, Inc.',
-    'NVIDIA Corporation',
-  ];
-  const countries = Object.keys(locationData);
+  public async run(dataSource: DataSource): Promise<void> {
+    const { faker } = await import('@faker-js/faker');
+    const logRepository = dataSource.getRepository(Log);
 
-  const logsData: DeepPartial<Log>[] = [];
+    const logsToCreate: Partial<Log>[] = [];
 
-  for (let i = 0; i < 50; i++) {
-    // 1. Chọn quốc gia
-    const country = randomFrom(countries);
+    // 🖥️ Danh sách các hệ thống cố định
+    const systemNames = [
+      'Windows 10 Pro',
+      'Windows 11 Home',
+      'Ubuntu 22.04 LTS',
+      'Debian 12',
+      'Fedora 39',
+      'Arch Linux',
+      'Kali Linux',
+      'macOS Ventura',
+      'macOS Sonoma',
+      'FreeBSD 13',
+      'CentOS 9',
+      'Red Hat Enterprise Linux 9',
+      'OpenSUSE Leap 15.5',
+    ];
 
-    // 2. Chọn state từ quốc gia đã chọn
-    const statesInCountry = Object.keys(locationData[country]);
-    const state = randomFrom(statesInCountry);
+    const stealerVendors = [
+      'Predator',
+      'Lumma',
+      'Raccoon',
+      'RedLine',
+      'Vidar',
+      'Meta',
+      'Aurora',
+      'Osiris',
+      'Storm',
+      'Rise',
+      'Remcos',
+      'Warzone',
+      'Mekotio',
+      'NjRAT',
+      'AsyncRAT',
+      'Quasar',
+      'Xworm',
+      'NanoCore',
+      'AgentTesla',
+      'Snake',
+      'Arkei',
+      'Baldr',
+      'ClipBanker',
+      'EvilGrab',
+      'FormBook',
+      'Pony',
+      'SmokeLoader',
+      'Hawkeye',
+      'NetWire',
+      'Glupteba',
+    ];
 
-    // 3. Chọn city và zip từ state đã chọn
-    const stateData = locationData[country][state];
-    const city = randomFrom(stateData.cities);
-    const zip = `${stateData.zipPrefix}${Math.floor(1000 + Math.random() * 9000)}`;
-    const isp = randomFrom(ispMap[country] || ['Unknown ISP']);
+    const totalLogs = 4000;
+    console.log(`📦 Generating ${totalLogs} logs...`);
 
-    const log: DeepPartial<Log> = {
-      stealer: randomFrom(stealers),
-      system_name: randomFrom(systems),
-      country: country,
-      links: generateLinks(Math.floor(Math.random() * 3) + 1), // 1-3 links
-      hasOutlook: Math.random() > 0.4,
-      state: state,
-      city: city,
-      zip: zip,
-      isp: isp,
-      emails:
-        Math.random() > 0.2
-          ? generateEmails(Math.floor(Math.random() * 4) + 1)
-          : [], // 80% có email
-      vendor: randomFrom(vendors),
-      struct: generateStruct(),
-      size: Math.floor(50 + Math.random() * 5000), // 50KB to 5MB
-      price: parseFloat((Math.random() * 45 + 5).toFixed(2)), // $5.00 to $50.00
-    };
+    for (let i = 0; i < totalLogs; i++) {
+      // 🌍 Chọn quốc gia & localized data
+      const countries = Object.keys(localizedSeedData);
+      const randomCountry = faker.helpers.arrayElement(countries);
+      const localized =
+        localizedSeedData[randomCountry] || localizedSeedData['US'];
 
-    logsData.push(log);
+      // 🧑 Người dùng + địa chỉ
+      const state = this.randomItem<string>(localized.states as string[]);
+      const city = this.randomItem<string>(localized.cities as string[]);
+      const zip = this.randomItem<string>(localized.zips as string[]);
+
+      // 🔗 Random links
+      const shuffledLinks = faker.helpers.shuffle(linksPool);
+      const linkCount = faker.number.int({
+        min: Math.floor(linksPool.length * 0.66),
+        max: linksPool.length,
+      });
+      const links = shuffledLinks.slice(0, linkCount);
+
+      // 📧 Email
+      const firstName = faker.person.firstName().toLowerCase();
+      const lastName = faker.person.lastName().toLowerCase();
+      const birthYear = faker.number.int({ min: 1960, max: 2005 });
+      const providers = [
+        'gmail.com',
+        'outlook.com',
+        'yahoo.com',
+        'icloud.com',
+        'hotmail.com',
+      ];
+      const email = `${firstName}.${lastName}${birthYear}@${faker.helpers.arrayElement(providers)}`;
+
+      // 📁 Struct, size, price
+      const struct = 'archive.zip';
+      const size = faker.number.int({ min: 5000, max: 25000 });
+      const price = parseFloat(
+        faker.number.float({ min: 25, max: 250, fractionDigits: 2 }).toFixed(2),
+      );
+
+      // 📅 createdAt
+      const createdAt = faker.date.between({
+        from: faker.date.past({ years: 2 }),
+        to: new Date(),
+      });
+
+      const isp = faker.company.name();
+
+      const log: Partial<Log> = {
+        stealer: faker.helpers.arrayElement(stealerVendors),
+        vendor: faker.helpers.arrayElement(stealerVendors),
+        system_name: faker.helpers.arrayElement(systemNames),
+        country: randomCountry,
+        state,
+        city,
+        zip,
+        isp,
+        hasOutlook: Math.random() < 0.5,
+        links,
+        emails: [email],
+        struct,
+        size,
+        price,
+        createdAt,
+        isAvailable: true,
+      };
+
+      logsToCreate.push(log);
+    }
+
+    console.log('⏫ Inserting logs into DB...');
+    for (let i = 0; i < logsToCreate.length; i += 500) {
+      await logRepository.insert(logsToCreate.slice(i, i + 500));
+      console.log(
+        `  • Inserted ${i + 500 > logsToCreate.length ? logsToCreate.length : i + 500}/${logsToCreate.length}`,
+      );
+    }
+
+    console.log('🎉 Log seeding completed successfully.');
   }
-
-  // Tạo và lưu tất cả entities trong một lần để tối ưu hiệu suất
-  const entities = repo.create(logsData);
-  await repo.save(entities);
-
-  console.log(`✅ Đã seed thành công ${logsData.length} logs!`);
-  await AppDataSource.destroy();
 }
 
-// Cho phép chạy file này trực tiếp bằng `ts-node src/seeds/log.seeder.ts`
-if (require.main === module) {
-  runLogSeeder().catch((e) => {
-    console.error('Lỗi khi chạy seeder cho Log:', e);
-    process.exit(1);
-  });
-}
+// 🏁 Tự động chạy Seeder nếu gọi trực tiếp

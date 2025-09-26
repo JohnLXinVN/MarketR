@@ -8,15 +8,26 @@ import AuthGuard from "../../components/AuthGuard";
 import { UserProvider, useUser } from "../../contexts/UserContext";
 import { SocketProvider } from "../../contexts/SocketContext";
 import { useState } from "react";
+import { useRouteLoading } from "../../components/useRouteLoading";
 
 export default function MainLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { loading, startLoading } = useRouteLoading();
 
   return (
     <UserProvider>
       <AuthGuard>
         <SocketProvider>
           <div className="h-full overflow-hidden bg-[url(/images/bg-body.jpg)] text-white">
+            {loading && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[9999]">
+                <div className="flex justify-center">
+                  <div className="relative w-12 h-12">
+                    <div className="absolute w-full h-full border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Sidebar */}
             {/* Desktop: cố định, Mobile: dạng drawer */}
             <div
@@ -24,7 +35,7 @@ export default function MainLayout({ children }) {
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
               lg:translate-x-0 bg-[#0b1a27]`}
             >
-              <Sidebar />
+              <Sidebar onLinkClick={startLoading} />
             </div>
 
             {/* Overlay khi mở sidebar mobile */}
@@ -37,7 +48,10 @@ export default function MainLayout({ children }) {
 
             {/* Header */}
             <div className="fixed top-0 left-0 lg:left-64 right-0 h-14 z-50">
-              <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+              <Header
+                onLinkClick={startLoading}
+                onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+              />
             </div>
 
             {/* Content */}
@@ -47,13 +61,17 @@ export default function MainLayout({ children }) {
 
                 {/* Footer link */}
                 <div className="bottom-6 w-full flex flex-wrap justify-center items-center space-x-4 sm:space-x-6 text-gray-400 text-xs sm:text-sm">
-                  <Link href="/dashboard" className="hover:text-white">
+                  <Link prefetch href="/dashboard" className="hover:text-white">
                     News
                   </Link>
-                  <Link href="/faq" className="hover:text-white">
+                  <Link prefetch href="/faq" className="hover:text-white">
                     FAQ
                   </Link>
-                  <Link href="/support/tickets" className="hover:text-white">
+                  <Link
+                    prefetch
+                    href="/support/tickets"
+                    className="hover:text-white"
+                  >
                     Support
                   </Link>
                 </div>
