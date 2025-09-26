@@ -103,8 +103,8 @@ export default function OrdersLogsTable() {
         </h1>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-700 text-sm">
-            <thead className="bg-[#132230] text-gray-200">
+          <table className="min-w-full border text-[12px] border-gray-700 text-sm">
+            <thead className=" text-[rgba(255,255,255,0.85)]">
               <tr>
                 <th className="border border-gray-700 px-3 py-2">ID</th>
                 <th className="border border-gray-700 px-3 py-2">Stealer</th>
@@ -129,10 +129,7 @@ export default function OrdersLogsTable() {
               ) : orders.length > 0 ? (
                 orders.map((order) => (
                   <>
-                    <tr
-                      key={order.id}
-                      className="bg-[#1a2d3d] hover:bg-[#22384a] transition"
-                    >
+                    <tr key={order.id} className="  transition">
                       <td className="border border-gray-700 px-3 py-2">
                         {order.log.id}
                       </td>
@@ -163,7 +160,7 @@ export default function OrdersLogsTable() {
                       </td>
                     </tr>
                     {openRow === order.id && (
-                      <tr className="bg-[#172736]">
+                      <tr className="">
                         <td
                           colSpan={7}
                           className="px-6 py-4 border border-gray-700"
@@ -217,7 +214,7 @@ export default function OrdersLogsTable() {
               ) : (
                 <tr>
                   <td colSpan={7} className="text-center p-8">
-                    You haven't purchased any logs yet.
+                    You haven&apos;t purchased any logs yet.
                   </td>
                 </tr>
               )}

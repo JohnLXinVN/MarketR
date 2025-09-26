@@ -136,6 +136,7 @@ export default function CvvPage() {
     [perPage, filters, selectedPrice]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isReady) {
       if (initialLoadRef.current) {
@@ -151,6 +152,7 @@ export default function CvvPage() {
     }
   }, [debouncedFilters, debouncedSelectedPrice, isReady]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isReady) return;
 

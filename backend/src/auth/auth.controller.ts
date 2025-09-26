@@ -55,7 +55,8 @@ export class AuthController {
   // API signup
   @Post('check-username')
   async checkUsername(@Body('username') username: string) {
-    if (!username) throw new BadRequestException("Username can't be empty");
+    if (!username)
+      throw new BadRequestException('Username can&apos;t be empty');
     return this.authService.checkUsername(username);
   }
 

@@ -10,9 +10,7 @@ export default function DashboardPage() {
         <div className="bg-black/20 p-6 rounded-md space-y-4">
           <h2 className="font-bold text-xl">Attention</h2>
           <p>Please bookmark or save all links to always have access!</p>
-          <p className="text-blue-400">WEB: https://rm1.cm/</p>
-          <p className="text-blue-400">WEB: https://rm1.ad/</p>
-          <p className="text-blue-400">WEB: https://russianmarket.com/</p>
+          <p className="text-blue-400">WEB: https://russianmarket/</p>
           <p className="text-red-500">TOR: http://russian76uguxb....onion</p>
         </div>
 

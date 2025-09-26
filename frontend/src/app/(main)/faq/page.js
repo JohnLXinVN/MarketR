@@ -8,8 +8,8 @@ export default function FAQPage() {
           <li>
             CHECKER IS AVAILABLE WITHIN 10 MINUTES. IF YOU DID NOT CHECK THE
             CARD IN THIS TIME, THE CARD BECOMES{" "}
-            <span className="font-semibold">"VALID"</span>, AND THE CARD WILL
-            NEVER BE EXCHANGED OR REFUNDED
+            <span className="font-semibold">&quot;VALID&quot;</span>, AND THE
+            CARD WILL NEVER BE EXCHANGED OR REFUNDED
           </li>
           <li>
             Please save your cards into your hard disk, as anything can happen
@@ -23,8 +23,8 @@ export default function FAQPage() {
           <li>If you cannot connect to our website try changing IP address.</li>
           <li>All purchased cards will be shown in Purchases.</li>
           <li>
-            If you're having any troubles, please double check before contacting
-            our support.
+            If you&apos;re having any troubles, please double check before
+            contacting our support.
           </li>
           <li>
             <span className="font-semibold">NEW-BIES!</span> Please activate
@@ -41,8 +41,6 @@ export default function FAQPage() {
           <span className="font-semibold text-green-400">@JohnZQK</span>
         </p>
       </div>
-
-      {/* Footer */}
     </div>
   );
 }

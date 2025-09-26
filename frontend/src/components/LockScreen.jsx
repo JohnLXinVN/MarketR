@@ -28,7 +28,7 @@ export default function LockScreen({ mode }) {
         // lấy dữ liệu signup trước đó
         const preSignup = JSON.parse(localStorage.getItem("preSignup") || "{}");
         if (!preSignup.username || !preSignup.password) {
-          throw new Error("Don't have signup info");
+          throw new Error("Don&apos;t have signup info");
         }
 
         // gọi API signup
@@ -57,7 +57,7 @@ export default function LockScreen({ mode }) {
       } else if (mode === "login") {
         const preLogin = JSON.parse(localStorage.getItem("preLogin") || "{}");
         if (!preLogin.username || !preLogin.password) {
-          throw new Error("Don't have login info");
+          throw new Error("Don&apos;t have login info");
         }
 
         const res = await fetch(
